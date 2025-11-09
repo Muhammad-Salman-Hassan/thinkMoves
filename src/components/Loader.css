@@ -1,0 +1,103 @@
+:root {
+    --loader-anim-dur: 3s;
+    --loader-anim-factor: 0.3s;
+  }
+  
+  /* ✅ Full-page overlay */
+  .loader-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #000; /* black background */
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden; /* hides the blurred shapes overflow */
+    z-index: 9999;
+  }
+  
+  /* ✅ Grid of squares */
+  .loader-container {
+    width: 50vmin;
+    height: 50vmin;
+    display: grid;
+    grid-template-rows: repeat(3, 1fr);
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    position: relative;
+    z-index: 2; /* ensure squares appear above blurred background */
+  }
+  
+  .loader-square {
+    border-radius: 5px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .loader-square::after {
+    content: "";
+    position: absolute;
+    background: rgba(255, 255, 255, 0.1);
+    height: 10vmin;
+    width: 10vmin;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+  }
+  
+  /* Hide middle square */
+  .loader-square:nth-child(5) {
+    opacity: 0;
+  }
+  
+  /* Animation sequence */
+  .loader-square:nth-child(7)::after {
+    animation: var(--loader-anim-dur) ease infinite loader-fade;
+  }
+  .loader-square:nth-child(2)::after {
+    animation: var(--loader-anim-dur) ease infinite loader-fade;
+    animation-delay: var(--loader-anim-factor);
+  }
+  .loader-square:nth-child(9)::after {
+    animation: var(--loader-anim-dur) ease infinite loader-fade;
+    animation-delay: calc(var(--loader-anim-factor) * 2);
+  }
+  .loader-square:nth-child(4)::after {
+    animation: var(--loader-anim-dur) ease infinite loader-fade;
+    animation-delay: calc(var(--loader-anim-factor) * 3);
+  }
+  .loader-square:nth-child(3)::after {
+    animation: var(--loader-anim-dur) ease infinite loader-fade;
+    animation-delay: calc(var(--loader-anim-factor) * 4);
+  }
+  .loader-square:nth-child(8)::after {
+    animation: var(--loader-anim-dur) ease infinite loader-fade;
+    animation-delay: calc(var(--loader-anim-factor) * 5);
+  }
+  .loader-square:nth-child(1)::after {
+    animation: var(--loader-anim-dur) ease infinite loader-fade;
+    animation-delay: calc(var(--loader-anim-factor) * 6);
+  }
+  .loader-square:nth-child(6)::after {
+    animation: var(--loader-anim-dur) ease infinite loader-fade;
+    animation-delay: calc(var(--loader-anim-factor) * 7);
+  }
+  
+  @keyframes loader-fade {
+    0%,
+    20% {
+      background: rgba(255, 255, 255, 0.1);
+      height: 10vmin;
+      width: 10vmin;
+    }
+    10% {
+      background: rgba(255, 255, 255, 0.3);
+      height: 30vmin;
+      width: 30vmin;
+    }
+  }
+  

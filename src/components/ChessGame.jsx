@@ -5,7 +5,7 @@ export default function ChessGame({ game, position, onPositionChange }) {
     const [moveFrom, setMoveFrom] = useState('');
     const [optionSquares, setOptionSquares] = useState({});
 
-    // Get move options for a square to show valid moves
+    
     function getMoveOptions(square) {
         const moves = game.moves({
             square,
@@ -36,12 +36,12 @@ export default function ChessGame({ game, position, onPositionChange }) {
         return true;
     }
 
-    // Handle square click
+  
     function onSquareClick(squareObj) {
-        // Extract square string from the object
+   
         const square = squareObj?.square || squareObj;
         
-        // Piece clicked to move
+        
         if (!moveFrom) {
             const hasMoveOptions = getMoveOptions(square);
             if (hasMoveOptions) {
@@ -50,7 +50,7 @@ export default function ChessGame({ game, position, onPositionChange }) {
             return;
         }
 
-        // Square clicked to move to
+       
         const moves = game.moves({
             square: moveFrom,
             verbose: true
@@ -63,7 +63,7 @@ export default function ChessGame({ game, position, onPositionChange }) {
             return;
         }
 
-        // Make the move
+      
         try {
             game.move({
                 from: moveFrom,
@@ -81,11 +81,10 @@ export default function ChessGame({ game, position, onPositionChange }) {
         }
     }
 
-    // Handle piece drop
+   
     function onPieceDrop(source, target, piece) {
-        console.log('onPieceDrop called:', { source, target, piece });
-        
-        // Extract from the source object
+     
+      
         const sourceSquare = source?.sourceSquare;
         const targetSquare = source?.targetSquare;
         
@@ -103,6 +102,10 @@ export default function ChessGame({ game, position, onPositionChange }) {
             
             if (move) {
                 console.log('Move successful:', move);
+                if(move.captured==="n"){
+                   
+                    console.log("Captured King")
+                }
                 onPositionChange(game.fen());
                 setMoveFrom('');
                 setOptionSquares({});

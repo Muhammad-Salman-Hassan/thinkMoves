@@ -11,68 +11,45 @@ import {
     Portal,
     useDisclosure,
 } from "@chakra-ui/react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FaArrowRight, FaBars } from "react-icons/fa";
 
 export default function Navbar() {
     const navigate = useNavigate();
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("access_token");
     const { open, onOpen, onClose } = useDisclosure();
-
+    const location = useLocation();
+    const currentPath = location.pathname;
     const handleLogout = () => {
-        localStorage.removeItem("token");
+        localStorage.clear();
         onClose();
         navigate("/login");
     };
 
-    const NavLinks = () => (
-        <>
+    const NavLinks = () => {
+        const links = [
+            { name: "Home", to: "/" },
+            { name: "Analyse", to: "/analyze" },
+            { name: "Library", to: "/library" },
+            { name: "About", to: "/about" },
+        ];
+
+        return links.map(link => (
             <ChakraLink
                 as={Link}
-                to="/"
-                color="gray.800"
-                fontWeight="500"
+                to={link.to}
+                key={link.to}
+                color={currentPath === link.to ? "#D32C32" : "gray.800"} 
+                fontWeight={currentPath === link.to ? "700" : "500"} 
                 _hover={{ color: "#D32C32", textDecoration: "none" }}
                 mx={4}
-                onClick={onClose}
+                onClick={onClose} 
             >
-                Home
+                {link.name}
             </ChakraLink>
-            <ChakraLink
-                as={Link}
-                to="/analyse"
-                color="gray.800"
-                fontWeight="500"
-                _hover={{ color: "#D32C32", textDecoration: "none" }}
-                mx={4}
-                onClick={onClose}
-            >
-                Analyse
-            </ChakraLink>
-            <ChakraLink
-                as={Link}
-                to="/library"
-                color="gray.800"
-                fontWeight="500"
-                _hover={{ color: "#D32C32", textDecoration: "none" }}
-                mx={4}
-                onClick={onClose}
-            >
-                Library
-            </ChakraLink>
-            <ChakraLink
-                as={Link}
-                to="/about"
-                color="gray.800"
-                fontWeight="500"
-                _hover={{ color: "#D32C32", textDecoration: "none" }}
-                mx={4}
-                onClick={onClose}
-            >
-                About
-            </ChakraLink>
-        </>
-    );
+        ));
+    };
+
 
     return (
         <Box
@@ -86,7 +63,7 @@ export default function Navbar() {
         >
             <Container maxW="container.xl" py={4}>
                 <Flex justify="space-between" align="center">
-                    {/* ✅ Gradient Logo */}
+                   
                     <Heading
                         size="4xl"
                         fontFamily="'Clash Display', sans-serif"
@@ -98,7 +75,6 @@ export default function Navbar() {
                         THINK MOVE
                     </Heading>
 
-                    {/* ✅ Desktop Navigation */}
                     <Flex align="center" gap="40px" display={{ base: "none", md: "flex" }}>
                         <HStack spacing={8}>
                             <NavLinks />
@@ -157,7 +133,6 @@ export default function Navbar() {
                         )}
                     </Flex>
 
-                    {/* ✅ Mobile Menu Button */}
                     <IconButton
                         aria-label="Open Menu"
 
@@ -171,7 +146,6 @@ export default function Navbar() {
                 </Flex>
             </Container>
 
-            {/* ✅ Mobile Drawer */}
             <Drawer.Root open={open} onOpenChange={onClose}>
                 <Portal>
                     <Drawer.Backdrop />

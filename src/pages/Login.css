@@ -1,0 +1,125 @@
+.left-section {
+    position: relative;
+    width: 50%;
+    height: 100vh;
+    background: #000;
+    color: white;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  
+  .bg-gradient {
+    position: absolute;
+    left: -30%;
+    top: -10%;
+    width: 80%;
+    height: auto;
+    object-fit: contain;
+    z-index: 2;
+  }
+  
+  .bg-whitegradient {
+    position: absolute;
+    left: -40%;
+    top: -30%;
+    width: 90%;
+    height: auto;
+    object-fit: contain;
+    z-index: 1;
+  }
+  
+  .orb {
+    position: absolute;
+    left: -70px;
+    top: 10%;
+    transform: rotate(180deg);
+    width: 180px;
+    height: auto;
+    z-index: 0;
+  }
+  
+  .queen {
+    position: absolute;
+    object-fit: contain;
+    z-index: 0;
+  }
+  
+  .queen1 {
+    right: 10%;
+    top: 0;
+    width: 800px;
+  }
+  
+  .queen2 {
+    right: 5%;
+    top: 30%;
+    width: 400px;
+  }
+  
+  .text-content {
+    position: relative;
+    z-index: 5;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 3rem 4rem;
+  }
+  
+  .top-heading {
+    color: #ff3b3b;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-family: "Clash Display", sans-serif;
+    font-size: 2rem;
+    margin-left: 4rem;
+  }
+  
+  .bottom-heading {
+    font-weight: 800;
+    text-transform: uppercase;
+    font-family: "Clash Display", sans-serif;
+    font-size: 3.5rem;
+    line-height: 1.1;
+    margin-left: 4rem;
+  }
+  
+  /* ---------- Responsive Styles ---------- */
+  
+  @media (max-width: 1024px) {
+    .queen1 {
+      width: 500px;
+      top: 5%;
+    }
+  
+    .queen2 {
+      width: 250px;
+    }
+  
+    .top-heading {
+      margin-left: 3rem;
+      font-size: 1.8rem;
+    }
+  
+    .bottom-heading {
+      margin-left: 3rem;
+      font-size: 2.8rem;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .left-section {
+      display: none; /* Hide left side on tablets/phones */
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .top-heading,
+    .bottom-heading {
+      text-align: center;
+      margin-left: 0;
+    }
+  }
+  

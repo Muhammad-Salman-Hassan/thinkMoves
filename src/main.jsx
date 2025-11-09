@@ -5,13 +5,15 @@ import { BrowserRouter } from "react-router-dom";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import App from "./App";
 import theme from "./theme";
+import { Toaster } from "./components/Toaster";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <GoogleOAuthProvider clientId="YOUR_GOOGLE_CLIENT_ID">
-     <ChakraProvider value={theme}>
+      <ChakraProvider value={theme}>
         <BrowserRouter>
           <App />
+          <Toaster />
         </BrowserRouter>
       </ChakraProvider>
     </GoogleOAuthProvider>
