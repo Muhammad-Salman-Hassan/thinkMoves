@@ -17,13 +17,19 @@ import {
     Spinner,
     Tabs,
 } from "@chakra-ui/react";
-import { LuSend, LuFolder } from "react-icons/lu";
+
 import { MdDelete, MdOutlineArrowOutward } from "react-icons/md";
-import { RiLayoutGridFill } from "react-icons/ri";
-import GradientBg from "../components/GradientBg";
+
 import { useNavigate } from "react-router-dom";
 import { BASE_URL } from "../utils/service";
 import { toaster } from "../components/Toaster";
+import orb1 from "../assets/orb1.png";
+import gradient from "../assets/gradientbg.png";
+import gradient1 from "../assets/gradientbg1.png";
+import whitegradient from "../assets/whitebg.png";
+import whitegradient1 from "../assets/whitebg1.png";
+
+import ConfirmDeleteButton from "../components/DeleteConfirmation";
 
 const Library = () => {
     const [games, setGames] = useState([]);
@@ -131,7 +137,7 @@ const Library = () => {
         const savedTime = item?.timeSaved
             ? new Date(item.timeSaved).toLocaleString()
             : "Unknown";
-            let metadata=JSON.parse(item.metadata)
+        let metadata = JSON.parse(item.metadata)
         return (
             <Box
                 key={item.gameId || item.positionId}
@@ -160,7 +166,7 @@ const Library = () => {
                 </Box>
 
                 <VStack align="start" p={4} spacing={2} flex="1">
-                <Text fontWeight="700" fontSize="md" noOfLines={1} title={name}>
+                    <Text fontWeight="700" fontSize="md" noOfLines={1} title={name}>
                         {metadata?.WhiteName} vs {metadata?.BlackName}
                     </Text>
                     <Text color="gray.500" fontSize="sm">
@@ -215,7 +221,12 @@ const Library = () => {
                     </Flex>
 
                     <HStack spacing={2}>
-                        <IconButton
+                        <ConfirmDeleteButton
+                            type="game"
+                            isLoading={loadingId === item.gameId}
+                            onConfirm={() => handleDelete(item.gameId, "game")}
+                        />
+                        {/* <IconButton
                             bg="#D32C32"
                             color="white"
                             width={["100%", "100px"]}
@@ -229,7 +240,7 @@ const Library = () => {
                             onClick={() => handleDelete(item.gameId || item.positionId, type)}
                         >
                             Delete {loadingId === (item.gameId || item.positionId) ? <Spinner size="sm" /> : <MdDelete />}
-                        </IconButton>
+                        </IconButton> */}
                     </HStack>
                 </HStack>
             </Box>
@@ -244,7 +255,7 @@ const Library = () => {
         const savedTime = position?.createdTime
             ? new Date(position.createdTime).toLocaleString()
             : "Unknown";
-  
+
         return (
             <Box
                 bg="white"
@@ -317,8 +328,12 @@ const Library = () => {
                             <MdOutlineArrowOutward style={{ fontSize: "12px" }} />
                         </Box>
                     </Flex>
-
-                    <IconButton
+                    <ConfirmDeleteButton
+                        type="position"
+                        isLoading={loadingId === position.posID}
+                        onConfirm={() => handleDelete(position.posID, "position")}
+                    />
+                    {/* <IconButton
                         bg="#D32C32"
                         color="white"
                         width={["100%", "100px"]}
@@ -331,7 +346,7 @@ const Library = () => {
                         onClick={() => handleDelete(position.posID, "position")}
                     >
                         Delete {loadingId === position.posID ? <Spinner size="sm" /> : <MdDelete />}
-                    </IconButton>
+                    </IconButton> */}
                 </HStack>
             </Box>
         );
@@ -339,7 +354,48 @@ const Library = () => {
 
     return (
         <>
-            <GradientBg>
+            <Box position="relative" bg="#000" color="white" overflow="hidden" w="100%">
+                {[
+                    { src: gradient, right: "-15%", top: "-55%" },
+                    { src: gradient1, left: "-20%", top: "-75%" },
+                    { src: whitegradient1, right: "-20%", top: "-130%" },
+                    { src: whitegradient, left: "-20%", top: "-130%" },
+
+                ].map((bg, i) => (
+                    <Box
+                        key={i}
+                        position="absolute"
+                        {...bg}
+                        width={{ base: "100%", md: "600px", lg: "800px" }}
+                        height={{ base: "200px", md: "600px", lg: "1000px" }}
+                        zIndex="1"
+                    >
+                        <Image src={bg.src} alt="bg" w="100%" h="100%" objectFit="contain" />
+                    </Box>
+                ))}
+
+
+                <Box
+                    position="absolute"
+                    right="-50px"
+                    top="20%"
+                    w={{ base: "120px", md: "180px", lg: "200px" }}
+                    h={{ base: "120px", md: "180px", lg: "200px" }}
+                    zIndex="0"
+                >
+                    <Image src={orb1} alt="orb" w="100%" h="100%" objectFit="contain" />
+                </Box>
+                <Box
+                    position="absolute"
+                    left="-70px"
+                    top="20%"
+                    transform="rotate(180deg)"
+                    w={{ base: "120px", md: "180px", lg: "200px" }}
+                    h={{ base: "120px", md: "180px", lg: "200px" }}
+                    zIndex="0"
+                >
+                    <Image src={orb1} alt="orb" w="100%" h="100%" objectFit="contain" />
+                </Box>
                 <Container maxW="container.xl" px={{ base: 4, md: 8 }} py={32}>
                     <Heading
                         fontSize={{ base: "2xl", sm: "4xl", md: "5xl", lg: "6xl" }}
@@ -352,7 +408,7 @@ const Library = () => {
                         Your Library
                     </Heading>
                 </Container>
-            </GradientBg>
+            </Box>
 
             <Container maxW="container.xl" px={{ base: 4, md: 8 }} py={8}>
                 <VStack align={"start"} mb={8}> <Heading fontSize={{ base: "2xl", sm: "4xl", md: "5xl", lg: "5xl" }} fontFamily="'Clash Display', sans-serif" color="black" fontWeight="600" > Library </Heading> <Text>All your analyzed games and </Text> <Text>saved positions — organized and easy to explore.</Text> </VStack>
@@ -468,7 +524,7 @@ const Library = () => {
                         ) : (
 
                             <SimpleGrid columns={{ base: 1, sm: 1, md: 3 }} gap={8}>
-                              
+
                                 {positions.map((pos) => PositionCard(pos))}
                             </SimpleGrid>
                         )}

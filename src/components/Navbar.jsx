@@ -31,7 +31,7 @@ export default function Navbar() {
             { name: "Home", to: "/" },
             { name: "Analyse", to: "/analyze" },
             { name: "Library", to: "/library" },
-            { name: "About", to: "/about" },
+            { name: "About", to: "/about-us" },
         ];
 
         return links.map(link => (

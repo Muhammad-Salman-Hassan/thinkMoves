@@ -16,6 +16,7 @@ import {
     useBreakpointValue,
     Field,
     Spinner,
+    InputGroup,
 
 } from "@chakra-ui/react";
 import { Chess } from "chess.js";
@@ -35,7 +36,7 @@ import { InvokeCommand, LambdaClient } from "@aws-sdk/client-lambda";
 import ChessAnalysis from "./DeepAnalyse";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-
+import { LuSearch } from "react-icons/lu";
 
 export default function HeroSectionWithChess({ isEdit }) {
     const chessGameRef = useRef(new Chess());
@@ -58,6 +59,7 @@ export default function HeroSectionWithChess({ isEdit }) {
         invalidMove: "",
         metadata: {}
     });
+    const [searchTerm, setSearchTerm] = useState("");
     const fileInputRef = useRef(null);
     const token = localStorage.getItem("access_token");
     const [selectedFiles, setSelectedFiles] = useState([]);
@@ -79,6 +81,42 @@ export default function HeroSectionWithChess({ isEdit }) {
             setImageList(previewUrls);
         }
     };
+
+    useEffect(() => {
+      
+        const movesText = Array.isArray(formData.correctMoves)
+            ? formData.correctMoves[0] || ""
+            : formData.correctMoves || "";
+
+      
+        const cleaned = movesText.replace(/\d+\./g, "").trim();
+
+       
+        const movesOnly = cleaned.split(/\s+/).filter(Boolean);
+
+      
+        chessGame.reset();
+        setChessPosition(chessGame.fen());
+        setMoveHistory(movesOnly);
+        setCurrentMoveIndex(movesOnly?.length);
+    }, [formData.correctMoves, isEdit]);
+
+
+    useEffect(() => {
+        if (fen) {
+            try {
+           
+                chessGame.load(fen);
+                setChessPosition(fen);
+            } catch (error) {
+                console.error("Failed to load FEN:", error);
+                chessGame.reset();
+                setChessPosition(chessGame.fen());
+            }
+        }
+    }, [fen]);
+
+
 
     useEffect(() => {
         if (isEdit) {
@@ -137,7 +175,7 @@ export default function HeroSectionWithChess({ isEdit }) {
                     });
 
                     setPreviewUrls(gameImageUrls || []);
-                   
+
                 } catch (err) {
                     console.error("❌ Failed to load game:", err);
                 } finally {
@@ -149,7 +187,7 @@ export default function HeroSectionWithChess({ isEdit }) {
         }
     }, [isEdit]);
 
-    
+
     const parseSafely = (value) => {
         try {
             if (!value) return "";
@@ -169,6 +207,86 @@ export default function HeroSectionWithChess({ isEdit }) {
         }));
     };
 
+    const handleTextBoxChange = (boxNumber, value) => {
+
+        const remainingText = Array.isArray(formData.remainingMoves)
+            ? formData.remainingMoves[0] || ""
+            : String(formData.remainingMoves || "");
+
+        const remainingLines = remainingText
+            .split("\n")
+            .map((line) => line.trim())
+            .filter(Boolean);
+
+
+        if (value.trim() === "") {
+            setFormData((prev) => ({
+                ...prev,
+                [`textBox${boxNumber}`]: value,
+            }));
+            return;
+        }
+
+        if (remainingLines.length === 0) {
+            setFormData((prev) => ({
+                ...prev,
+                [`textBox${boxNumber}`]: value,
+            }));
+            return;
+        }
+
+
+        let firstLine = remainingLines[0];
+        const parts = firstLine.split(/\s+/);
+
+        if (boxNumber === 1) {
+
+            parts[1] = value;
+        } else if (boxNumber === 2) {
+
+            while (parts.length < 3) parts.push("");
+            parts[2] = value;
+        }
+
+        const updatedFirstLine = parts.join(" ");
+        const updatedRemainingMoves = [updatedFirstLine, ...remainingLines.slice(1)].join("\n");
+
+        setFormData((prev) => ({
+            ...prev,
+            remainingMoves: updatedRemainingMoves,
+            [`textBox${boxNumber}`]: value,
+        }));
+    };
+
+
+    useEffect(() => {
+
+        const remainingText = Array.isArray(formData.remainingMoves)
+            ? formData.remainingMoves[0] || ""
+            : String(formData.remainingMoves || "");
+
+        const remainingLines = remainingText
+            .split("\n")
+            .map((line) => line.trim())
+            .filter(Boolean);
+
+        if (remainingLines.length > 0) {
+            const firstLine = remainingLines[0];
+            const parts = firstLine.split(/\s+/);
+
+            const whiteMove = parts[1] || "";
+            const blackMove = parts[2] || "";
+
+
+            if (formData.textBox1 !== whiteMove || formData.textBox2 !== blackMove) {
+                setFormData((prev) => ({
+                    ...prev,
+                    textBox1: whiteMove,
+                    textBox2: blackMove,
+                }));
+            }
+        }
+    }, [formData.remainingMoves]);
 
 
     const handlePositionChange = (newPosition) => {
@@ -188,30 +306,50 @@ export default function HeroSectionWithChess({ isEdit }) {
     const moveForward = () => {
         if (currentMoveIndex < moveHistory.length - 1) {
             const newIndex = currentMoveIndex + 1;
+
+
             chessGame.reset();
-            for (let i = 0; i <= newIndex; i++) chessGame.move(moveHistory[i]);
+
+
+            for (let i = 0; i <= newIndex; i++) {
+                try {
+                    chessGame.move(moveHistory[i]);
+                } catch (error) {
+                    console.error(`Failed to apply move ${i}: ${moveHistory[i]}`, error);
+                    return;
+                }
+            }
+
             setChessPosition(chessGame.fen());
             setCurrentMoveIndex(newIndex);
         }
     };
+   
 
     const moveBackward = () => {
+       
         if (currentMoveIndex >= 0) {
             const newIndex = currentMoveIndex - 1;
+
+
             chessGame.reset();
-            for (let i = 0; i <= newIndex; i++) chessGame.move(moveHistory[i]);
+
+
+            for (let i = 0; i <= newIndex - 1; i++) {
+                try {
+                    chessGame.move(moveHistory[i]);
+                } catch (error) {
+                    console.error(`Failed to apply move ${i}: ${moveHistory[i]}`, error);
+                    return;
+                }
+            }
+
             setChessPosition(chessGame.fen());
             setCurrentMoveIndex(newIndex);
         }
     };
 
-    const randomMove = () => {
-        const possibleMoves = chessGame.moves();
-        if (possibleMoves.length === 0) return;
-        const move = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
-        chessGame.move(move);
-        handlePositionChange(chessGame.fen());
-    };
+
 
     const flexDirection = useBreakpointValue({ base: "column", lg: "row" });
     const handleFileChange = (e) => {
@@ -224,83 +362,79 @@ export default function HeroSectionWithChess({ isEdit }) {
         fileInputRef.current.click();
     };
     const analyzeGame = async () => {
-        if (selectedFiles.length === 0) {
+        if (selectedFiles.length === 0) return;
 
-            return;
-        }
-
-        const formData = new FormData();
-        selectedFiles.forEach((file) => formData.append("gameImages", file));
+        const formDataPayload = new FormData();
+        selectedFiles.forEach((file) => formDataPayload.append("gameImages", file));
 
         try {
             setLoading(true);
 
-
-            const response = await API.post("/Api/ThinkMoves/ThinkMovesAI", formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
+            const response = await API.post("/Api/ThinkMoves/ThinkMovesAI", formDataPayload, {
+                headers: { "Content-Type": "multipart/form-data" },
             });
+
             const data = response.data;
+            setData(data);
+
+            const { metadataImages, moveImages } = separateImages(data?.croppedImages, data?.metadata);
+
+            const remainingMoves = data?.remainingPGN?.join(" ") || "";
+            const moves = remainingMoves
+                .replace(/\d+\.\s*/g, "")
+                .trim()
+                .split(/\s+/)
+                .filter((m) => m);
+
+            const whiteMoveFirst = moves[0] || "";
+            const blackMoveFirst = moves[1] || "";
+
+
+            const whiteMoveImage = moveImages.find(
+                (m) => m.moveNumber === 1 && m.moveColor === "WhiteMove"
+            );
+            const blackMoveImage = moveImages.find(
+                (m) => m.moveNumber === 1 && m.moveColor === "BlackMove"
+            );
+
             const errorMsg = data?.gameError || "";
-            setData(data)
-
-
             const match = errorMsg.match(/(White|Black) move (\d+) failed/i);
-            let nextErrorColor = null;
-            let nextErrorMoveNumber = null;
-
-            if (match) {
-                nextErrorColor = match[1];
-                nextErrorMoveNumber = Number(match[2]);
-            }
+            const nextErrorColor = match?.[1] || null;
+            const nextErrorMoveNumber = match ? Number(match[2]) : null;
 
 
-            let matchedImage = null;
-            if (nextErrorColor && nextErrorMoveNumber) {
-                const colorKey = nextErrorColor === "White" ? "WhiteMove" : "BlackMove";
-                matchedImage = moveImages.find(
-                    (m) =>
-                        m.moveNumber === nextErrorMoveNumber &&
-                        m.moveColor === colorKey
-                );
-            }
 
-
-            const resetBoxes =
-                nextErrorColor === "White"
-                    ? { whiteMove: "", textBox1: "" }
-                    : nextErrorColor === "Black"
-                        ? { blackMove: "", textBox2: "" }
-                        : { whiteMove: "", blackMove: "" };
             setFormData((prev) => ({
                 ...prev,
-                correctMoves: data.correctMovesPGN.join("\n") || "",
-                remainingMoves: data.remainingPGN.join("\n") || "",
-                suggestedMoves: data.suggestedMoves.join("\n") || "",
-                error: data.gameError || "",
+                correctMoves: data.correctMovesPGN?.join("\n") || "",
+                remainingMoves: data.remainingPGN?.join("\n") || "",
+                suggestedMoves: data.suggestedMoves?.join("\n") || "",
                 metadata: data?.metadata,
-                errorImageUrl: matchedImage?.url || null,
+                textBox1: whiteMoveFirst,
+                textBox2: blackMoveFirst,
+                whiteMove: whiteMoveFirst,
+                blackMove: blackMoveFirst,
+                errorWhiteImageUrl: whiteMoveImage?.url || null,
+                errorBlackImageUrl: blackMoveImage?.url || null,
+                error: data.gameError || "",
                 errorColor: nextErrorColor || null,
-                ...resetBoxes,
-            }));
-            setFen(data?.lastValidFEN)
 
+            }));
+
+
+            setFen(data?.lastValidFEN);
             setAnalyzedImages(data.croppedImages || []);
             setPreviewUrls(data.gameImages || []);
             setLoading(false);
-
         } catch (error) {
-            console.error(error);
+            console.error("Analyze Game Error:", error);
             setLoading(false);
-
         }
     };
 
 
-    if (loading) {
-        return <Loader />
-    }
+
+
 
     const handleOpenSaveModal = () => {
         setIsSaveModalOpen(true);
@@ -389,13 +523,6 @@ export default function HeroSectionWithChess({ isEdit }) {
                     );
                 }
 
-                console.log(whiteMoveImage, blackMoveImage)
-                const resetBoxes =
-                    nextErrorColor === "White"
-                        ? { whiteMove: "", textBox1: "" }
-                        : nextErrorColor === "Black"
-                            ? { blackMove: "", textBox2: "" }
-                            : { whiteMove: "", blackMove: "" };
 
                 setChessPosition(parsedBody?.LastValidFEN)
                 setFormData((prev) => ({
@@ -412,7 +539,7 @@ export default function HeroSectionWithChess({ isEdit }) {
                     errorBlackImageUrl: blackMoveImage?.url || null,
 
                     errorColor: nextErrorColor || null,
-                    ...resetBoxes,
+                    // ...resetBoxes,
                 }));
                 setFen(parsedBody?.LastValidFEN)
 
@@ -429,7 +556,7 @@ export default function HeroSectionWithChess({ isEdit }) {
             setRechecingLoading(false);
         }
     };
-    console.log(formData);
+  
     const handleMetadataChange = (key, value) => {
         setFormData((prev) => ({
             ...prev,
@@ -483,8 +610,19 @@ export default function HeroSectionWithChess({ isEdit }) {
         }));
     };
 
+    const moves =
+        formData?.suggestedMoves
+            ?.split("\n")
+            .map((m) => m.trim())
+            .filter((m) => m !== "") || [];
 
-    
+
+    const filteredMoves = moves.filter((move) =>
+        move.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+
+
     return (
         <>
             <GradientBg>
@@ -537,7 +675,7 @@ export default function HeroSectionWithChess({ isEdit }) {
                         flexWrap="wrap"
 
                     >
-                        {/* === LEFT: CHESS BOARD === */}
+
                         <VStack spacing={6} w={{ base: "100%", lg: "35%" }} align="center">
                             <Box
                                 boxShadow="2xl"
@@ -577,9 +715,7 @@ export default function HeroSectionWithChess({ isEdit }) {
                                     >
                                         <IoMdArrowRoundForward />
                                     </IconButton>
-                                    <IconButton bg="#D32C32" color="white" onClick={randomMove}>
-                                        <FaRandom />
-                                    </IconButton>
+
                                 </HStack>
 
                                 <HStack
@@ -632,10 +768,10 @@ export default function HeroSectionWithChess({ isEdit }) {
                                         justifyContent="space-between"
                                         p={4}
                                     >
-                                        Analyze Game
-                                        <Box bg="black" p={1} borderRadius="full" border="1px solid white">
+                                        Analyze Game {loading ? <Spinner size={"sm"} /> : <Box bg="black" p={1} borderRadius="full" border="1px solid white">
                                             <IoMdArrowRoundForward />
-                                        </Box>
+                                        </Box>}
+
                                     </Button>
                                 </HStack>
                             </VStack>
@@ -650,6 +786,20 @@ export default function HeroSectionWithChess({ isEdit }) {
                             px={{ base: 2, md: 4 }}
                             zIndex="2"
                         >
+
+                            <InputGroup mb={3} endElement={<LuSearch />} bg={"white"} borderRadius={"md"} color={"black"}>
+
+
+                                <Input
+                                    type="text"
+                                    placeholder="Search Suggested Moves"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    borderColor="gray.300"
+                                    _focus={{ borderColor: "red.400", boxShadow: "0 0 0 1px #D32C32" }}
+                                />
+                            </InputGroup>
+
 
                             <SimpleGrid columns={{ base: 1, md: 3 }} gap={4}>
                                 <Field.Root >
@@ -679,22 +829,26 @@ export default function HeroSectionWithChess({ isEdit }) {
                                 <Field.Root w={"100%"}>
                                     <Field.Label color="white">Suggested Moves</Field.Label>
                                     <Box bg="white" color="black" p={2} borderRadius="md" height="120px" overflowY="auto" w={"100%"}>
-                                        {formData.suggestedMoves
-                                            ?.split("\n")
-                                            .filter((m) => m.trim() !== "")
-                                            .map((move, idx) => (
+                                        {filteredMoves.length > 0 ? (
+                                            filteredMoves.map((move, idx) => (
                                                 <Button
                                                     key={idx}
                                                     size="sm"
                                                     bg="#D32C32"
-                                                    color={"white"}
-                                                    variant="outline"
+                                                    color="white"
+                                                    variant="solid"
                                                     m={1}
-                                                    onClick={() => handleSuggestedMoveClick(move.trim())}
+                                                    onClick={() => handleSuggestedMoveClick(move)}
+                                                    _hover={{ bg: "#b42329" }}
                                                 >
-                                                    {move.trim()}
+                                                    {move}
                                                 </Button>
-                                            ))}
+                                            ))
+                                        ) : (
+                                            <Box color="gray.500" fontSize="sm">
+                                                No matching results
+                                            </Box>
+                                        )}
                                     </Box>
 
                                 </Field.Root>
@@ -736,14 +890,13 @@ export default function HeroSectionWithChess({ isEdit }) {
 
                             </HStack>
 
-
                             <SimpleGrid columns={{ base: 2, md: 4 }} gap={3}>
                                 <Field.Root >
                                     <Field.Label color="white">Text Box 1</Field.Label>
                                     <Input
                                         name="textBox1"
                                         value={formData.textBox1}
-                                        onChange={handleChange}
+                                        onChange={(e) => handleTextBoxChange(1, e.target.value)}
                                         placeholder="Text Box 1"
                                         bg="white"
                                         color="black"
@@ -756,7 +909,7 @@ export default function HeroSectionWithChess({ isEdit }) {
                                     />
                                 </Field.Root>
 
-                                {/* White Move area */}
+
                                 {formData.errorWhiteImageUrl ? (
                                     <Field.Root w={"100%"}>
                                         <Field.Label color="white">White Move</Field.Label>
@@ -835,7 +988,7 @@ export default function HeroSectionWithChess({ isEdit }) {
                                     <Input
                                         name="textBox2"
                                         value={formData.textBox2}
-                                        onChange={handleChange}
+                                        onChange={(e) => handleTextBoxChange(2, e.target.value)}
                                         placeholder="Text Box 2"
                                         bg="white"
                                         color="black"
@@ -852,7 +1005,7 @@ export default function HeroSectionWithChess({ isEdit }) {
 
                             <Box width="100%">
                                 <SimpleGrid columns={{ base: 1, md: 2 }} gap={4} width="100%">
-                                    {/* Column 1 */}
+
                                     <HStack spacing={4} width="100%">
                                         <Button
                                             bg="#D32C32"
@@ -882,7 +1035,7 @@ export default function HeroSectionWithChess({ isEdit }) {
                                         </Button>
                                     </HStack>
 
-                                    {/* Column 2 */}
+
                                     <HStack spacing={4} width="100%">
                                         <Button
                                             bg="#D32C32"
@@ -932,7 +1085,6 @@ export default function HeroSectionWithChess({ isEdit }) {
                                     color="white"
                                     height="45px"
                                     onClick={() => openImageModal("moves")}
-                                    // disabled={analyzedImages.length === 0}
                                     borderRadius={"14.82px"}
                                     border={"1px solid"}
                                     borderColor={"linear-gradient(265.38deg, rgba(255, 255, 255, 0.6) 24.8%, rgba(255, 255, 255, 0.3) 85.32%)"}
@@ -983,12 +1135,10 @@ export default function HeroSectionWithChess({ isEdit }) {
                 setIsImageModalOpen={setIsImageModalOpen}
                 formData={formData}
                 imageList={imageList}
-                // isImageModalOpen={isImageModalOpen}
-                // setIsImageModalOpen={setIsImageModalOpen}
                 metadataImages={metadataImages}
                 moveImages={moveImages}
                 type={imageModalType}
-            // formData={formData}
+
             />
             <SaveGameModal
                 isOpen={isSaveModalOpen}

@@ -109,7 +109,7 @@ const ImagePreviewModal = ({
                                                         objectFit="cover"
                                                         width="100%"
                                                         height="auto"
-                                                        maxH={["150px", "200px", "250px"]}
+                                                        maxH={["150px", "200px", "600px"]}
                                                     />
                                                 </Box>
                                             ))}
