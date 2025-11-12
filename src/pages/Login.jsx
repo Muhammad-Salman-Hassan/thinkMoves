@@ -53,7 +53,7 @@ export default function Login() {
         <img src={queen2} className="queen queen2" alt="queen2" />
 
         <div className="text-content">
-          <h3 className="top-heading">THINK MOVES</h3>
+          <h3 className="top-heading">THINKMOVES</h3>
           <h1 className="bottom-heading">
             PICK UP WHERE <br /> YOU LEFT OFF
           </h1>

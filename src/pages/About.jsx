@@ -59,7 +59,7 @@ const About = () => {
                 <Container maxW="container.xl" px={{ base: 4, md: 8 }} py={32}>
                     <div className="about-heading">
                         <h1 className="about-title">ABOUT</h1>
-                        <h1 className="about-gradient">THINKMOVE</h1>
+                        <h1 className="about-gradient">THINKMOVES</h1>
                     </div>
                 </Container>
             </Box>

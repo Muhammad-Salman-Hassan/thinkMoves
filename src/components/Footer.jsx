@@ -80,7 +80,7 @@ export default function Footer() {
                             color="transparent"
                             fontWeight="600"
                         >
-                            THINK MOVE
+                            THINKMOVES
                         </Heading>
                         <Text fontSize="sm" color="gray.300" lineHeight="1.6">
                             ThinkMoves helps players understand their chess journey — one move

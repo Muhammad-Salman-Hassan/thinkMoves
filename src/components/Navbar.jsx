@@ -72,7 +72,7 @@ export default function Navbar() {
                         color="transparent"
                         fontWeight="600"
                     >
-                        THINK MOVE
+                        THINKMOVES
                     </Heading>
 
                     <Flex align="center" gap="40px" display={{ base: "none", md: "flex" }}>
