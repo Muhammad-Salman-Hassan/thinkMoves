@@ -6,6 +6,14 @@
     text-align: center;
     flex-wrap: wrap; /* allows wrapping on smaller screens */
   }
+.about-heading-3rd {
+    display: flex;
+    gap: 10px;
+    justify-content: start;
+    align-items: start;
+    text-align: start;
+    flex-wrap: wrap; /* allows wrapping on smaller screens */
+  }
   
   /* Common typography (from Figma) */
   .about-title,
@@ -24,6 +32,9 @@
   /* "ABOUT" text – solid white */
   .about-title {
     color: white;
+  }
+  .about-heading-3rd .about-title {
+    color: black;
   }
   
   /* "THINK MOVE" text – gradient from red to pink */

@@ -5,10 +5,11 @@ import gradient1 from "../assets/gradientbg1.png";
 import story1 from "../assets/story1.svg";
 import story2 from "../assets/story2.svg";
 import story3 from "../assets/story3.svg";
+import board from "../assets/chessBoard.jpg";
 
 import whitegradient from "../assets/whitebg.png";
 import whitegradient1 from "../assets/whitebg1.png";
-import { Box, Container, Flex, Heading, Image, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, Container, Flex, Heading, Image, Text, VStack } from '@chakra-ui/react'
 import './About.css' // import CSS file
 
 const About = () => {
@@ -63,6 +64,82 @@ const About = () => {
                     </div>
                 </Container>
             </Box>
+
+
+            <Container maxW="container.xl" px={{ base: 4, md: 8 }} >
+                <Box bg="white" px={{ base: 6, md: 16, lg: 0 }} py={{ base: 12, md: 24, lg: 12 }}>
+                    <Flex
+                        align="stretch" // key: makes both columns equal height
+                        direction={{ base: "column-reverse", md: "row" }}
+                        justify="space-between"
+                        gap={12}
+                        mx="auto"
+                    >
+
+                        <Box flex="1" display="flex" alignItems="stretch">
+                            <Image
+                                src={board}
+                                alt="Chess board"
+                                borderRadius="xl"
+                                boxShadow="lg"
+                                w="100%"
+                                h="100%" // will stretch to match text height
+                                objectFit="cover"
+                            />
+                        </Box>
+                        {/* Text Side */}
+                        <VStack
+                            align="start"
+                            justify="center"
+                            spacing={5}
+                            flex="1"
+                            maxW={{ base: "100%", md: "50%" }}
+                        >
+                            <Text fontSize="md" color="black" textTransform="uppercase" fontWeight={600}>
+                                <Text as="span" color="red" fontSize={"18px"}>●</Text> About
+                            </Text>
+
+                            <Text
+                                as="span"
+                                fontSize={{ base: "2xl", md: "4xl", lg: "7xl" }}
+
+                                fontFamily="'Clash Display', sans-serif"
+                                color={"black"}
+                                fontWeight="semibold"
+                                letterSpacing={-1}
+                                lineHeight={"72px"}
+                            >
+                                Learn from Every Move <br />
+                                <Text
+                                    as="span"
+                                    color="#D32C32"
+                                    fontSize={{ base: "2xl", md: "4xl", lg: "7xl" }}
+                                    fontWeight="semibold"
+                                    letterSpacing={-1}
+                                    lineHeight={"0px"}
+                                >
+                                    The Story of ThinkMoves
+                                </Text>
+                            </Text>
+
+
+
+                            <Text fontSize="md" color="gray.600">
+                                ThinkMoves is built for chess lovers who aim to grow with every
+                                move. Explore our journey of strategy, discipline, and creative
+                                thinking.
+                            </Text>
+
+                            <Button colorScheme="red" size="lg" borderRadius="full">
+                                Read More
+                            </Button>
+                        </VStack>
+
+
+
+                    </Flex>
+                </Box>
+            </Container>
 
             <Box position="relative" bg="#000" color="white" overflow="hidden" w="100%">
                 {[
@@ -192,9 +269,9 @@ const About = () => {
                                                 {item.number}
                                             </Text>
                                             <Box w={"80px"}><Image src={item.img} w={"80px"} height={"80px"} /></Box>
-                                            
+
                                         </VStack>
-                                        <Text fontSize="lg" fontWeight="semibold" lineHeight="short"  fontFamily="'Clash Display', sans-serif" w={"50%"}>
+                                        <Text fontSize="lg" fontWeight="semibold" lineHeight="short" fontFamily="'Clash Display', sans-serif" w={"50%"}>
                                             {item.title}
                                         </Text>
                                     </Flex>
@@ -207,7 +284,58 @@ const About = () => {
                         </Box>
                     </Box>
                 </Container>
+
+
+
+                {/* ---------- Section 3: Books & Merch ---------- */}
+
             </Box>
+
+
+
+            <Box bg="gray.50" py={{ base: 16, md: 24 }} px={{ base: 6, md: 16 }}>
+                <VStack
+                    spacing={10}
+                    textAlign="start"
+                    justify="flex-start"
+                    align="start" // ensure everything aligns left
+                >
+                    {/* Custom Gradient Heading */}
+                    <div className="about-heading-3rd">
+                        <h1 className="about-title">BOOKS &</h1>
+                        <h1 className="about-gradient">MERCHS</h1>
+                    </div>
+
+                    {/* Section Description */}
+                    <Text
+                        color="gray.600"
+                        maxW="3xl"
+                        fontSize={{ base: "md", md: "lg" }}
+                        lineHeight="tall"
+                    >
+                        Carefully curated learning material and exclusive merchandise for
+                        ThinkMoves members.
+                    </Text>
+
+                    {/* Coming Soon Box */}
+                    <Box
+                        bg="white"
+                        borderRadius="2xl"
+                        boxShadow="md"
+                        p={12}
+                        textAlign="center"
+                        w={{ base: "full", md: "lg" }}
+                    >
+                        <Text fontSize="2xl" fontWeight="bold" color="gray.700">
+                            📚 Coming Soon!
+                        </Text>
+                        <Text color="gray.500" mt={2}>
+                            Our books and merchandise will be available soon. Stay tuned!
+                        </Text>
+                    </Box>
+                </VStack>
+            </Box>
+
         </>
     )
 }
