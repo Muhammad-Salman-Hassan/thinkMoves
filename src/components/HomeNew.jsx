@@ -470,7 +470,7 @@ export default function HomeNew({ isEdit }) {
         setIsPositionModalOpen(true);
     };
 
-    const game = new Chess(data?.lastValidFEN);
+    const game = new Chess(data?.lastValidFEN || 'start');
     const whosturn = game.turn();
 
 
