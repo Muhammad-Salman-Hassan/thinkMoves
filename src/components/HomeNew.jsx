@@ -470,9 +470,12 @@ export default function HomeNew({ isEdit }) {
         setIsPositionModalOpen(true);
     };
 
-    const game = new Chess(data?.lastValidFEN || 'start');
-    const whosturn = game.turn();
+    const lastfen = data?.lastValidFEN && data.lastValidFEN.trim() !== ""
+        ? data.lastValidFEN
+        : "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
+    const game = new Chess(lastfen);
+    const whosturn = game.turn();
 
 
     const handleRecheck = async () => {
