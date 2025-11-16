@@ -9,6 +9,7 @@ import Analyze from "../pages/Analyze";
 import AnalyzeEdit from "../pages/AnalyzeEdit";
 import ViewPosition from "../pages/ViewPosition";
 import About from "../pages/About";
+import ProfileUI from "../pages/Profile";
 
 export default function AppRoutes() {
   return (
@@ -29,6 +30,7 @@ export default function AppRoutes() {
         <Route index element={<AnalyzeEdit />} path="/analyze/:id" />
         <Route index element={<ViewPosition />} path="/view-position" />
         <Route index element={<About />} path="/about-us" />
+        <Route index element={<ProfileUI />} path="/profile" />
 
       </Route>
     </Routes>

@@ -29,7 +29,7 @@ export function separateImages(croppedImages = [], metadata = {}, remaining_pgn 
 
   moveImages.sort((a, b) => a.moveNumber - b.moveNumber);
 
-  // attach PGN moves
+ 
   if (Array.isArray(remaining_pgn)) {
     remaining_pgn.forEach((line) => {
       const match = line.match(/^(\d+)\.\s*([^\s]+)\s*([^\s]+)?/);
@@ -56,14 +56,34 @@ export function separateImages(croppedImages = [], metadata = {}, remaining_pgn 
 
 
 export function getMoveStyle(formData, move) {
-  const isError =
-    formData.errorColor &&
-    formData.errorColor.toLowerCase() === move.moveColor.replace("Move", "").toLowerCase() &&
-    formData.error?.includes(move.moveNumber);
+  if (!formData.error || !move.moveColor) {
+      return {
+          borderColor: "green",
+          bgColor: "white",
+      };
+  }
+
+
+  const errorMatch = formData.error.match(/(White|Black) move (\d+) failed/i);
+  
+  if (!errorMatch) {
+      return {
+          borderColor: "green",
+          bgColor: "white",
+      };
+  }
+
+  const [, errorColor, errorMoveNumber] = errorMatch;
+  const errorMoveNumberInt = parseInt(errorMoveNumber);
+  
+
+  const isError = 
+      errorMoveNumberInt === move.moveNumber &&
+      errorColor.toLowerCase() === move.moveColor.replace("Move", "").toLowerCase();
 
   return {
-    borderColor: isError ? "red" : "green",
-    bgColor: isError ? "orange" : "white",
+      borderColor: isError ? "red" : "green",
+      bgColor: isError ? "orange" : "white",
   };
 }
 

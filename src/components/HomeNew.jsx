@@ -56,6 +56,7 @@ export default function HomeNew({ isEdit }) {
         whiteMove: "",
         blackMove: "",
         textBox2: "",
+        movesByKey: {},
         invalidMove: "",
         metadata: {}
     });
@@ -83,23 +84,35 @@ export default function HomeNew({ isEdit }) {
     };
 
     useEffect(() => {
-
         const movesText = Array.isArray(formData.correctMoves)
             ? formData.correctMoves[0] || ""
             : formData.correctMoves || "";
 
-
         const cleaned = movesText.replace(/\d+\./g, "").trim();
-
-
         const movesOnly = cleaned.split(/\s+/).filter(Boolean);
 
+        console.log("Moves:", movesOnly);
 
-        chessGame.reset();
-        setChessPosition(chessGame.fen());
+        // 1. Reset chess engine
+        const game = new Chess();
+        game.reset();
+
+        // 2. Replay all moves
+        movesOnly.forEach((m) => {
+            try {
+                game.move(m);
+            } catch (err) {
+                console.log("Invalid move:", m);
+            }
+        });
+
+        // 3. Update board + history
+        setChessPosition(game.fen());
         setMoveHistory(movesOnly);
-        setCurrentMoveIndex(movesOnly?.length);
+        setCurrentMoveIndex(movesOnly.length);
+
     }, [formData.correctMoves, isEdit]);
+
 
 
     useEffect(() => {
@@ -140,15 +153,45 @@ export default function HomeNew({ isEdit }) {
                         }
                     );
 
-                    const { correctMoves, remainingMoves, metadata, gameImageUrls, notes, timeSaved } =
+                    const { correctMoves, remainingMoves, metadata, gameImageUrls, notes, timeSaved, moveImageUrls } =
                         response.data;
-
 
                     const parsedCorrectMoves = parseSafely(correctMoves);
                     const parsedRemainingMoves = parseSafely(remainingMoves);
                     const parsedMetadata = JSON.parse(JSON.parse(metadata));
 
-                    // setAnalyzedImages(response.data.moveImageUrls || []);
+
+                    let remainingMovesArray = [];
+
+                    if (Array.isArray(parsedRemainingMoves)) {
+
+                        remainingMovesArray = parsedRemainingMoves
+                            .join('\n')
+                            .split('\n')
+                            .map(line => line.trim())
+                            .filter(Boolean);
+                    } else if (typeof parsedRemainingMoves === 'string') {
+
+                        remainingMovesArray = parsedRemainingMoves
+                            .split('\n')
+                            .map(line => line.trim())
+                            .filter(Boolean);
+                    }
+
+
+
+                    const { metadataImages, moveImages } = separateImages(
+                        response.data.moveImageUrls,
+                        parsedMetadata,
+                        remainingMovesArray
+                    );
+
+
+                    const movesByKey = {};
+                    (moveImages || []).forEach(m => {
+                        const key = `${m.moveNumber}-${m.moveColor}`;
+                        movesByKey[key] = m;
+                    });
 
                     setFormData({
                         correctMoves: parsedCorrectMoves || "",
@@ -163,8 +206,8 @@ export default function HomeNew({ isEdit }) {
                         metadata: parsedMetadata || {},
                         notes: notes || "",
                         timeSaved: timeSaved || "",
+                        movesByKey,
                     });
-
 
                     setData({
                         correctMoves: parsedCorrectMoves,
@@ -173,7 +216,8 @@ export default function HomeNew({ isEdit }) {
                         gameImages: gameImageUrls || [],
                         croppedImages: response.data.moveImageUrls || []
                     });
-
+                    console.log(gameImageUrls, "gameImageUrls")
+                    setAnalyzedImages(moveImageUrls)
                     setPreviewUrls(gameImageUrls || []);
 
                 } catch (err) {
@@ -187,7 +231,6 @@ export default function HomeNew({ isEdit }) {
         }
     }, [isEdit]);
 
-
     const parseSafely = (value) => {
         try {
             if (!value) return "";
@@ -199,46 +242,49 @@ export default function HomeNew({ isEdit }) {
     };
 
 
-    // const handleChange = (e, moveNumber, moveColor) => {
-    //     const value = e.target.value;
-
-    //     setFormData((prev) => {
-    //         const updatedMoves = prev.moveImages.map((m) =>
-    //             m.moveNumber === moveNumber && m.moveColor === moveColor
-    //                 ? { ...m, move: value }
-    //                 : m
-    //         );
-    //         return { ...prev, moveImages: updatedMoves };
-    //     });
-    // };
     const [localMoveValues, setLocalMoveValues] = useState({});
 
     const handleChange = (e, moveNumber, moveColor) => {
         const value = e.target.value;
         const key = `${moveNumber}-${moveColor}`;
 
-        // Update local state immediately for responsive typing
+
         setLocalMoveValues(prev => ({
             ...prev,
             [key]: value
         }));
 
-        // Debounce the formData update
+
         clearTimeout(window.moveUpdateTimeout);
         window.moveUpdateTimeout = setTimeout(() => {
-            setFormData((prev) => {
-                const updatedMoves = prev.moveImages.map((m) =>
-                    m.moveNumber === moveNumber && m.moveColor === moveColor
-                        ? { ...m, move: value }
-                        : m
-                );
-                return { ...prev, moveImages: updatedMoves };
+            setFormData((prev) => ({
+                ...prev,
+                movesByKey: {
+                    ...prev.movesByKey,
+                    [key]: {
+                        ...prev.movesByKey[key],
+                        move: value
+                    }
+                }
+            }));
+
+
+            setLocalMoveValues(prev => {
+                const { [key]: _, ...rest } = prev;
+                return rest;
             });
-        }, 1000);
+        }, 10);
     };
 
 
-
+    const convertMovesToArray = () => {
+        return Object.entries(formData.movesByKey).map(([key, moveData]) => ({
+            moveNumber: moveData.moveNumber,
+            moveColor: moveData.moveColor,
+            move: moveData.move,
+            url: moveData.url
+        }));
+    };
 
 
     useEffect(() => {
@@ -363,6 +409,13 @@ export default function HomeNew({ isEdit }) {
 
             const { metadataImages, moveImages } = separateImages(data?.croppedImages, data?.metadata, data?.remainingPGN);
 
+
+            const movesByKey = {};
+            moveImages.forEach(m => {
+                const key = `${m.moveNumber}-${m.moveColor}`;
+                movesByKey[key] = m;
+            });
+
             const remainingMoves = data?.remainingPGN?.join(" ") || "";
             const moves = remainingMoves
                 .replace(/\d+\.\s*/g, "")
@@ -373,24 +426,16 @@ export default function HomeNew({ isEdit }) {
             const whiteMoveFirst = moves[0] || "";
             const blackMoveFirst = moves[1] || "";
 
-
-            const whiteMoveImage = moveImages.find(
-                (m) => m.moveNumber === 1 && m.moveColor === "WhiteMove"
-            );
-            const blackMoveImage = moveImages.find(
-                (m) => m.moveNumber === 1 && m.moveColor === "BlackMove"
-            );
+            const whiteMoveImage = movesByKey["1-WhiteMove"];
+            const blackMoveImage = movesByKey["1-BlackMove"];
 
             const errorMsg = data?.gameError || "";
             const match = errorMsg.match(/(White|Black) move (\d+) failed/i);
             const nextErrorColor = match?.[1] || null;
-            const nextErrorMoveNumber = match ? Number(match[2]) : null;
-
-
 
             setFormData((prev) => ({
                 ...prev,
-                moveImages,
+                movesByKey,
                 correctMoves: data.correctMovesPGN?.join("\n") || "",
                 remainingMoves: data.remainingPGN?.join("\n") || "",
                 suggestedMoves: data.suggestedMoves?.join("\n") || "",
@@ -403,9 +448,7 @@ export default function HomeNew({ isEdit }) {
                 errorBlackImageUrl: blackMoveImage?.url || null,
                 error: data.gameError || "",
                 errorColor: nextErrorColor || null,
-
             }));
-
 
             setFen(data?.lastValidFEN);
             setAnalyzedImages(data.croppedImages || []);
@@ -416,7 +459,6 @@ export default function HomeNew({ isEdit }) {
             setLoading(false);
         }
     };
-
 
 
 
@@ -441,10 +483,11 @@ export default function HomeNew({ isEdit }) {
             const aws_secretAccessKey = import.meta.env.VITE_AWS_SECRET_ACCESS_KEY;
             const lambdaFunctionName = import.meta.env.VITE_LAMBDA_RECHECK_FUNCTION_NAME;
 
-            // ✅ Build payload directly from moveImages (most accurate)
             const thinkmovessScannedGame = {};
 
-            const sortedMoves = [...formData.moveImages].sort((a, b) => a.moveNumber - b.moveNumber);
+
+            const sortedMoves = Object.values(formData.movesByKey)
+                .sort((a, b) => a.moveNumber - b.moveNumber);
 
             sortedMoves.forEach((m) => {
                 const key = m.moveNumber.toString();
@@ -457,7 +500,6 @@ export default function HomeNew({ isEdit }) {
                     thinkmovessScannedGame[key].blackMove = m.move || "";
                 }
             });
-
 
             const payload = {
                 body: JSON.stringify({ ThinkMoveScannedGame: thinkmovessScannedGame }),
@@ -494,16 +536,14 @@ export default function HomeNew({ isEdit }) {
                 let whiteMoveImage = null;
                 let blackMoveImage = null;
 
+
                 if (nextErrorMoveNumber) {
-                    whiteMoveImage = formData.moveImages.find(
-                        (m) => m.moveNumber === nextErrorMoveNumber && m.moveColor === "WhiteMove"
-                    );
-                    blackMoveImage = formData.moveImages.find(
-                        (m) => m.moveNumber === nextErrorMoveNumber && m.moveColor === "BlackMove"
-                    );
+                    whiteMoveImage = formData.movesByKey[`${nextErrorMoveNumber}-WhiteMove`];
+                    blackMoveImage = formData.movesByKey[`${nextErrorMoveNumber}-BlackMove`];
                 }
 
                 setChessPosition(parsedBody?.LastValidFEN);
+
                 setFormData((prev) => ({
                     ...prev,
                     correctMoves: parsedBody.CorrectMovesPGN?.join("\n") || "",
@@ -549,59 +589,49 @@ export default function HomeNew({ isEdit }) {
         const [, color, moveNumberStr] = match;
         const moveNumber = Number(moveNumberStr);
         const isBlack = color.toLowerCase() === "black";
+        const moveColor = isBlack ? "BlackMove" : "WhiteMove";
+        const key = `${moveNumber}-${moveColor}`;
 
-        // --- Update moveImages ---
-        const updatedMoveImages = formData.moveImages.map((m) => {
-            if (m.moveNumber === moveNumber && m.moveColor === (isBlack ? "BlackMove" : "WhiteMove")) {
-                return { ...m, move: selectedMove };
-            }
-            return m;
-        });
 
-        // --- Rebuild remainingMoves line-by-line ---
+        setFormData((prev) => ({
+            ...prev,
+            movesByKey: {
+                ...prev.movesByKey,
+                [key]: {
+                    ...prev.movesByKey[key],
+                    move: selectedMove
+                }
+            },
+
+            ...(isBlack ? { textBox2: selectedMove } : { textBox1: selectedMove })
+        }));
+
+
         const remainingLines = formData.remainingMoves
             .split("\n")
             .map((line) => line.trim())
             .filter(Boolean);
 
         const updatedLines = remainingLines.map((line) => {
-            // Match a line like "2. b4 Na6"
             const lineMatch = line.match(/^(\d+)\.\s*([^\s]+)?\s*([^\s]+)?/);
             if (!lineMatch) return line;
 
             const lineMoveNumber = Number(lineMatch[1]);
-            if (lineMoveNumber !== moveNumber) return line; // skip if not the error move number
+            if (lineMoveNumber !== moveNumber) return line;
 
             const whiteMove = lineMatch[2] || "";
             const blackMove = lineMatch[3] || "";
 
             if (!isBlack) {
-                // White move replacement
                 return `${moveNumber}. ${selectedMove} ${blackMove}`.trim();
             } else {
-                // Black move replacement
                 return `${moveNumber}. ${whiteMove} ${selectedMove}`.trim();
             }
         });
 
         const rebuiltPGN = updatedLines.join("\n");
-
-        // --- Update text boxes ---
-        const textBoxUpdates = isBlack
-            ? { textBox2: selectedMove }
-            : { textBox1: selectedMove };
-
-        // --- Apply all updates ---
-        setFormData((prev) => ({
-            ...prev,
-            moveImages: updatedMoveImages,
-            remainingMoves: rebuiltPGN.trim(),
-            ...textBoxUpdates,
-        }));
-
-
+        setFormData(prev => ({ ...prev, remainingMoves: rebuiltPGN.trim() }));
     };
-
 
 
 
@@ -616,7 +646,7 @@ export default function HomeNew({ isEdit }) {
         move.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-
+    console.log(formData, "SALMAN")
 
     return (
         <>
@@ -975,113 +1005,113 @@ export default function HomeNew({ isEdit }) {
                             </HStack>
                             <Box h={200} overflowY={"scroll"} bg={"white"} p={2}>
                                 <SimpleGrid columns={{ base: 4, md: 4 }} gap={3}>
-                                    {formData.moveImages
-                                        // Group moves in pairs (white + black)
+                                    {formData.movesByKey && Object.values(formData.movesByKey)
                                         .filter((m) => m.moveColor === "WhiteMove")
+                                        .sort((a, b) => a.moveNumber - b.moveNumber)
                                         .map((whiteMove) => {
-                                            const blackMove = formData.moveImages.find(
-                                                (m) => m.moveNumber === whiteMove.moveNumber && m.moveColor === "BlackMove"
-                                            );
+                                            const blackKey = `${whiteMove.moveNumber}-BlackMove`;
+                                            const blackMove = formData.movesByKey[blackKey];
 
                                             const whiteStyle = getMoveStyle(formData, whiteMove);
                                             const blackStyle = getMoveStyle(formData, blackMove || {});
-                                            console.log(whiteStyle)
+
                                             return (
                                                 <React.Fragment key={whiteMove.moveNumber}>
-                                                    {/* White move text box */}
-                                                    <Field.Root>
-                                                        {/* <Field.Label color="white">White Move {whiteMove.moveNumber}</Field.Label> */}
-                                                        <Input
-                                                            name={`whiteMove_${whiteMove.moveNumber}`}
-                                                            value={
-                                                                localMoveValues[`${whiteMove.moveNumber}-WhiteMove`] ??
-                                                                whiteMove.move ??
-                                                                ""
-                                                            }
-                                                            onChange={(e) => handleChange(e, whiteMove.moveNumber, "WhiteMove")}
-                                                            placeholder="White Move"
-                                                            bg={whiteStyle.bgColor}
-                                                            color="black"
-                                                            height="35px"
-                                                            borderColor={whiteStyle.borderColor}
-                                                            borderWidth="2px"
-                                                        />
-                                                    </Field.Root>
-
-                                                    {/* White move image */}
-                                                    <Field.Root>
-                                                        {/* <Field.Label color="white">Image</Field.Label> */}
-                                                        {whiteMove.url && (
-                                                            <Box
-                                                                bg={whiteStyle.bgColor}
-                                                                borderRadius="md"
-                                                                height="35px"
-                                                                display="flex"
-                                                                alignItems="center"
-                                                                justifyContent="center"
-                                                                borderColor={whiteStyle.borderColor}
-                                                                borderWidth="2px"
-                                                            >
-                                                                <Image
-                                                                    src={whiteMove.url}
-                                                                    alt="White move"
+                                                    {
+                                                        <>
+                                                            <Field.Root>
+                                                                <Input
+                                                                    name={`whiteMove_${whiteMove.moveNumber}`}
+                                                                    value={
+                                                                        localMoveValues[`${whiteMove.moveNumber}-WhiteMove`] ??
+                                                                        whiteMove.move ??
+                                                                        ""
+                                                                    }
+                                                                    onChange={(e) => handleChange(e, whiteMove.moveNumber, "WhiteMove")}
+                                                                    placeholder="White Move"
+                                                                    bg={whiteStyle.bgColor}
+                                                                    color="black"
                                                                     height="35px"
-                                                                    width="100%"
-                                                                    objectFit="cover"
+                                                                    borderColor={whiteStyle.borderColor}
+                                                                    borderWidth="2px"
                                                                 />
-                                                            </Box>
-                                                        )}
-                                                    </Field.Root>
+                                                            </Field.Root>
 
-                                                    {/* Black move image */}
-                                                    <Field.Root>
-                                                        {/* <Field.Label color="white">Image</Field.Label> */}
-                                                        {blackMove?.url && (
-                                                            <Box
-                                                                bg={blackStyle.bgColor}
-                                                                borderRadius="md"
-                                                                height="35px"
-                                                                display="flex"
-                                                                alignItems="center"
-                                                                justifyContent="center"
-                                                                borderColor={blackStyle.borderColor}
-                                                                borderWidth="2px"
-                                                            >
-                                                                <Image
-                                                                    src={blackMove.url}
-                                                                    alt="Black move"
+
+                                                            <Field.Root>
+                                                                {whiteMove.url && (
+                                                                    <Box
+                                                                        bg={whiteStyle.bgColor}
+                                                                        borderRadius="md"
+                                                                        height="35px"
+                                                                        display="flex"
+                                                                        alignItems="center"
+                                                                        justifyContent="center"
+                                                                        borderColor={whiteStyle.borderColor}
+                                                                        borderWidth="2px"
+                                                                    >
+                                                                        <Image
+                                                                            src={whiteMove.url}
+                                                                            alt="White move"
+                                                                            height="35px"
+                                                                            width="100%"
+                                                                            objectFit="cover"
+                                                                        />
+                                                                    </Box>
+                                                                )}
+                                                            </Field.Root>
+
+
+                                                            <Field.Root>
+                                                                {blackMove?.url && (
+                                                                    <Box
+                                                                        bg={blackStyle.bgColor}
+                                                                        borderRadius="md"
+                                                                        height="35px"
+                                                                        display="flex"
+                                                                        alignItems="center"
+                                                                        justifyContent="center"
+                                                                        borderColor={blackStyle.borderColor}
+                                                                        borderWidth="2px"
+                                                                    >
+                                                                        <Image
+                                                                            src={blackMove.url}
+                                                                            alt="Black move"
+                                                                            height="35px"
+                                                                            width="100%"
+                                                                            objectFit="cover"
+                                                                        />
+                                                                    </Box>
+                                                                )}
+                                                            </Field.Root>
+
+
+                                                            <Field.Root>
+                                                                <Input
+                                                                    name={`blackMove_${whiteMove.moveNumber}`}
+                                                                    value={
+                                                                        localMoveValues[`${whiteMove.moveNumber}-BlackMove`] ??
+                                                                        blackMove?.move ??
+                                                                        ""
+                                                                    }
+                                                                    onChange={(e) => handleChange(e, whiteMove.moveNumber, "BlackMove")}
+                                                                    placeholder="Black Move"
+                                                                    bg={blackStyle.bgColor}
+                                                                    color="black"
                                                                     height="35px"
-                                                                    width="100%"
-                                                                    objectFit="cover"
+                                                                    borderColor={blackStyle.borderColor}
+                                                                    borderWidth="2px"
                                                                 />
-                                                            </Box>
-                                                        )}
-                                                    </Field.Root>
+                                                            </Field.Root>
+                                                        </>
+                                                    }
 
-                                                    {/* Black move text box */}
-                                                    <Field.Root>
-                                                        {/* <Field.Label color="white">Black Move {whiteMove.moveNumber}</Field.Label> */}
-                                                        <Input
-                                                            name={`blackMove_${whiteMove.moveNumber}`}
-                                                            value={
-                                                                localMoveValues[`${whiteMove.moveNumber}-BlackMove`] ??
-                                                                blackMove?.move ??
-                                                                ""
-                                                            }
-                                                            onChange={(e) => handleChange(e, whiteMove.moveNumber, "BlackMove")}
-                                                            placeholder="Black Move"
-                                                            bg={blackStyle.bgColor}
-                                                            color="black"
-                                                            height="35px"
-                                                            borderColor={blackStyle.borderColor}
-                                                            borderWidth="2px"
-                                                        />
-                                                    </Field.Root>
                                                 </React.Fragment>
                                             );
                                         })}
                                 </SimpleGrid>
                             </Box>
+
 
 
 

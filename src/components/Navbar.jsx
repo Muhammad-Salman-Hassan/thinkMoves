@@ -13,6 +13,7 @@ import {
 } from "@chakra-ui/react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FaArrowRight, FaBars } from "react-icons/fa";
+import { RiProfileFill } from "react-icons/ri";
 
 export default function Navbar() {
     const navigate = useNavigate();
@@ -20,10 +21,15 @@ export default function Navbar() {
     const { open, onOpen, onClose } = useDisclosure();
     const location = useLocation();
     const currentPath = location.pathname;
+    const handleNavigate = () => {
+        // localStorage.clear();
+        // onClose();
+        navigate("/profile");
+    };
     const handleLogout = () => {
         localStorage.clear();
         onClose();
-        navigate("/login");
+        navigate("/profile");
     };
 
     const NavLinks = () => {
@@ -39,11 +45,11 @@ export default function Navbar() {
                 as={Link}
                 to={link.to}
                 key={link.to}
-                color={currentPath === link.to ? "#D32C32" : "gray.800"} 
-                fontWeight={currentPath === link.to ? "700" : "500"} 
+                color={currentPath === link.to ? "#D32C32" : "gray.800"}
+                fontWeight={currentPath === link.to ? "700" : "500"}
                 _hover={{ color: "#D32C32", textDecoration: "none" }}
                 mx={4}
-                onClick={onClose} 
+                onClick={onClose}
             >
                 {link.name}
             </ChakraLink>
@@ -63,7 +69,7 @@ export default function Navbar() {
         >
             <Container maxW="container.xl" py={4}>
                 <Flex justify="space-between" align="center">
-                   
+
                     <Heading
                         size="4xl"
                         fontFamily="'Clash Display', sans-serif"
@@ -82,7 +88,7 @@ export default function Navbar() {
 
                         {token ? (
                             <Button
-                                onClick={handleLogout}
+                                onClick={handleNavigate}
                                 bg="#D32C32"
                                 color="white"
                                 _hover={{ bg: "#b92027" }}
@@ -93,7 +99,7 @@ export default function Navbar() {
                                 border="1.65px solid #D32C32"
                                 gap="10px"
                             >
-                                Logout
+                                <RiProfileFill />
                             </Button>
                         ) : (
                             <HStack spacing={4}>
