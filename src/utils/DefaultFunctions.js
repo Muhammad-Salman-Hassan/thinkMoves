@@ -29,39 +29,36 @@ export function separateImages(croppedImages = [], metadata = {}, remaining_pgn 
 
   moveImages.sort((a, b) => a.moveNumber - b.moveNumber);
 
-  // ✅ Create a map of all moves
+
   const allMovesMap = new Map();
 
-  // ✅ Helper function to parse ALL moves from PGN lines
+  
   const parseAllMoves = (pgnArray) => {
     if (!Array.isArray(pgnArray)) return [];
     
     const moves = [];
     
-    // Join all array items and split by newlines to get individual lines
     const allLines = pgnArray.join('\n').split('\n');
     
     allLines.forEach((line) => {
       const trimmed = line.trim();
       if (!trimmed) return;
       
-      // Skip lines that are just numbers (like "69." "70." etc)
       if (/^\d+\.$/.test(trimmed)) return;
       
-      // Match pattern: "1. e3 b5" or "4. exd6 Bg4"
       const match = trimmed.match(/^(\d+)\.\s+(.+)$/);
       if (!match) return;
       
       const moveNumber = parseInt(match[1]);
       const movesText = match[2].trim();
       
-      // Split moves by whitespace
+      
       const moveParts = movesText.split(/\s+/).filter(part => {
-        // Filter out empty strings and standalone numbers with dots
+   
         return part && !/^\d+\.$/.test(part);
       });
       
-      // First part is white move
+      
       if (moveParts[0]) {
         moves.push({
           moveNumber,
@@ -70,7 +67,7 @@ export function separateImages(croppedImages = [], metadata = {}, remaining_pgn 
         });
       }
       
-      // Second part is black move (if exists)
+    
       if (moveParts[1]) {
         moves.push({
           moveNumber,
@@ -83,7 +80,7 @@ export function separateImages(croppedImages = [], metadata = {}, remaining_pgn 
     return moves;
   };
 
-  // ✅ Parse all correct moves
+  
   const correctMoves = parseAllMoves(correct_pgn);
   correctMoves.forEach((move) => {
     const key = `${move.moveNumber}-${move.moveColor}`;
@@ -93,7 +90,7 @@ export function separateImages(croppedImages = [], metadata = {}, remaining_pgn 
     });
   });
 
-  // ✅ Parse all remaining moves
+ 
   const remainingMoves = parseAllMoves(remaining_pgn);
   remainingMoves.forEach((move) => {
     const key = `${move.moveNumber}-${move.moveColor}`;
@@ -105,7 +102,7 @@ export function separateImages(croppedImages = [], metadata = {}, remaining_pgn 
     }
   });
 
-  // ✅ Merge with images
+
   moveImages.forEach((img) => {
     const key = `${img.moveNumber}-${img.moveColor}`;
     const existingMove = allMovesMap.get(key);
@@ -117,7 +114,7 @@ export function separateImages(croppedImages = [], metadata = {}, remaining_pgn 
     }
   });
 
-  // ✅ Convert map back to sorted array
+  
   const finalMoveImages = Array.from(allMovesMap.values())
     .sort((a, b) => {
       if (a.moveNumber !== b.moveNumber) {
