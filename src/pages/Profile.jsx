@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Box,
     Flex,
@@ -20,6 +20,9 @@ import gradient1 from "../assets/gradientbg1.png";
 import whitegradient from "../assets/whitebg.png";
 import whitegradient1 from "../assets/whitebg1.png";
 import { useNavigate } from "react-router-dom";
+import { toaster } from "../components/Toaster";
+import axios from "axios";
+import { BASE_URL } from "../utils/service";
 
 function EditableUsername({ value, onSave }) {
     const [isEditing, setIsEditing] = useState(false);
@@ -42,10 +45,10 @@ function EditableUsername({ value, onSave }) {
                     <Text fontSize="14px" color="gray.600">{value}</Text>
                     <IconButton
                         size="xs"
-                        icon={<FiEdit2 />}
+
                         variant="ghost"
                         onClick={() => setIsEditing(true)}
-                    />
+                    ><FiEdit2 /></IconButton>
                 </Flex>
             ) : (
                 <Flex align="center" gap={2}>
@@ -55,8 +58,8 @@ function EditableUsername({ value, onSave }) {
                         onChange={(e) => setTemp(e.target.value)}
                         autoFocus
                     />
-                    <IconButton size="xs" icon={<FiCheck />} colorScheme="green" onClick={save} />
-                    <IconButton size="xs" icon={<FiX />} colorScheme="red" onClick={cancel} />
+                    <IconButton size="xs" colorScheme="green" onClick={save} ><FiCheck /></IconButton>
+                    <IconButton size="xs" colorScheme="red" onClick={cancel} ><FiX /></IconButton>
                 </Flex>
             )}
         </Box>
@@ -66,11 +69,74 @@ function EditableUsername({ value, onSave }) {
 export default function ProfileUI() {
     const [email, setEmail] = useState("thinkmoves@exm.com");
     const navigate = useNavigate()
+
+    const [profile, setProfile] = useState(null);
+    const token = localStorage.getItem("id_token");
+
+    useEffect(() => {
+        fetchProfile();
+    }, []);
+
+    const fetchProfile = async () => {
+        try {
+            const res = await axios.post(
+                `${BASE_URL}/api/Profile/GetProfileDetails`,
+                {},
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            console.log("PROFILE", res.data);
+            setProfile(res.data);
+
+        } catch (err) {
+            console.error("Error fetching profile:", err);
+        }
+    };
+
     const handleLogout = () => {
         localStorage.clear();
 
         navigate("/");
     };
+
+    const updateUserName = async (newUserName) => {
+        try {
+            const token = localStorage.getItem("id_token");
+
+            await axios.post(
+                `${BASE_URL}/api/Profile/SetUserName`,
+                { userName: newUserName },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            toaster.create({
+                title: "Username updated",
+                description: "Your username has been successfully changed.",
+                type: "success",
+            });
+
+            return true;
+
+        } catch (error) {
+            console.error("Error updating username:", error);
+            if (error.status === 401) {
+                localStorage.clear()
+                window.location.href = "/login"
+            }
+            toaster.create({
+                title: "Error",
+                description: error.response?.data || "Failed to update username.",
+                type: "error",
+            });
+
+            return false;
+        }
+    };
+
     return (
         <>
             <Box position="relative" bg="#000" color="white" overflow="hidden" w="100%">
@@ -154,7 +220,13 @@ export default function ProfileUI() {
                                     THINKMOVES#4832
                                 </Text>
 
-                                <EditableUsername value={email} onSave={setEmail} />
+                                <EditableUsername
+                                    value={email}
+                                    onSave={async (newValue) => {
+                                        const ok = await updateUserName(newValue);
+                                        if (ok) setEmail(newValue);
+                                    }}
+                                />
 
                                 <Box mt={4} w="100%">
                                     <Flex justify="space-between" py={1}>

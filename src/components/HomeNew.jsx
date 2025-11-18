@@ -74,7 +74,7 @@ export default function HomeNew({ isEdit }) {
     const [imageModalType, setImageModalType] = useState("");
     const { id } = useParams();
     const decodedGameID = decodeURIComponent(id);
-    const { metadataImages, moveImages } = separateImages(data?.croppedImages, data?.metadata, data?.remainingPGN);
+    const { metadataImages, moveImages } = separateImages(data?.croppedImages, data?.metadata, data?.remainingPGN, data.correctMovesPGN);
     const openImageModal = (type) => {
         setImageModalType(type);
         setIsImageModalOpen(true);
@@ -91,7 +91,7 @@ export default function HomeNew({ isEdit }) {
         const cleaned = movesText.replace(/\d+\./g, "").trim();
         const movesOnly = cleaned.split(/\s+/).filter(Boolean);
 
-        console.log("Moves:", movesOnly);
+
 
         // 1. Reset chess engine
         const game = new Chess();
@@ -183,7 +183,8 @@ export default function HomeNew({ isEdit }) {
                     const { metadataImages, moveImages } = separateImages(
                         response.data.moveImageUrls,
                         parsedMetadata,
-                        remainingMovesArray
+                        remainingMovesArray,
+                        parsedCorrectMoves
                     );
 
 
@@ -216,7 +217,7 @@ export default function HomeNew({ isEdit }) {
                         gameImages: gameImageUrls || [],
                         croppedImages: response.data.moveImageUrls || []
                     });
-                    console.log(gameImageUrls, "gameImageUrls")
+                   
                     setAnalyzedImages(moveImageUrls)
                     setPreviewUrls(gameImageUrls || []);
 
@@ -277,14 +278,7 @@ export default function HomeNew({ isEdit }) {
     };
 
 
-    const convertMovesToArray = () => {
-        return Object.entries(formData.movesByKey).map(([key, moveData]) => ({
-            moveNumber: moveData.moveNumber,
-            moveColor: moveData.moveColor,
-            move: moveData.move,
-            url: moveData.url
-        }));
-    };
+
 
 
     useEffect(() => {
@@ -390,7 +384,7 @@ export default function HomeNew({ isEdit }) {
         fileInputRef.current.click();
     };
 
-
+    
     const analyzeGame = async () => {
         if (selectedFiles.length === 0) return;
 
@@ -407,7 +401,7 @@ export default function HomeNew({ isEdit }) {
             const data = response.data;
             setData(data);
 
-            const { metadataImages, moveImages } = separateImages(data?.croppedImages, data?.metadata, data?.remainingPGN);
+            const { metadataImages, moveImages } = separateImages(data?.croppedImages, data?.metadata, data?.remainingPGN, data.correctMovesPGN);
 
 
             const movesByKey = {};
@@ -649,7 +643,7 @@ export default function HomeNew({ isEdit }) {
         move.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    console.log(formData, "SALMAN")
+
 
     return (
         <>
