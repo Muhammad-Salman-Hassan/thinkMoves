@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -43,6 +44,7 @@ export default function Callback() {
                     },
                     body: tokenParams.toString(),
                 });
+                
 
                 const data = await res.json();
 
@@ -54,7 +56,14 @@ export default function Callback() {
               
                 localStorage.setItem("id_token", data.id_token);
                 localStorage.setItem("access_token", data.access_token);
+                const response = await axios.post(
+                    `${import.meta.env.VITE_BASE_URL}/api/Profile/SaveOrCheckPlayerDetails`,
+                    {},
+                    { headers: { Authorization: `Bearer ${data.id_token}` } }
+                );
+                
 
+                console.log("POS",response)
                
                 navigate("/");
             } catch (err) {

@@ -3,17 +3,21 @@ import {
     Box,
     Flex,
     Text,
-    Avatar,
     IconButton,
     Input,
-    SimpleGrid,
     Button,
-    AvatarGroup,
     Image,
-    Heading,
     Container,
+    Avatar,
+    AvatarGroup,
+    Dialog,
+    Portal,
+    VStack,
+    HStack,
+    Heading,
 } from "@chakra-ui/react";
-import { FiEdit2, FiX, FiCheck } from "react-icons/fi";
+import { FiEdit2, FiX, FiCheck, FiUserPlus } from "react-icons/fi";
+import { FaTimes } from "react-icons/fa";
 import orb1 from "../assets/orb1.png";
 import gradient from "../assets/gradientbg.png";
 import gradient1 from "../assets/gradientbg1.png";
@@ -23,58 +27,77 @@ import { useNavigate } from "react-router-dom";
 import { toaster } from "../components/Toaster";
 import axios from "axios";
 import { BASE_URL } from "../utils/service";
+import AddFriendModal from "../components/AddFriendModal";
 
-function EditableUsername({ value, onSave }) {
-    const [isEditing, setIsEditing] = useState(false);
-    const [temp, setTemp] = useState(value);
-
-    const save = () => {
-        onSave(temp);
-        setIsEditing(false);
-    };
-
-    const cancel = () => {
-        setTemp(value);
-        setIsEditing(false);
-    };
-
+function FriendItem({ name, status, hasActions, onAccept, onReject, hasUnfriend, onUnfriend }) {
     return (
-        <Box>
-            {!isEditing ? (
-                <Flex align="center" gap={2}>
-                    <Text fontSize="14px" color="gray.600">{value}</Text>
+        <Flex
+            align="center"
+            justify="space-between"
+            p={2}
+            borderRadius="md"
+            bg="gray.50"
+            _hover={{ bg: "gray.100" }}
+            border={"1px solid #e4e4e7"}
+        >
+            <Flex align="center" gap={3}>
+                <Avatar.Root size="sm">
+                    <Avatar.Fallback>{name.substring(0, 2).toUpperCase()}</Avatar.Fallback>
+                </Avatar.Root>
+                <Box>
+                    <Text fontSize="14px" fontWeight="medium">{name}</Text>
+                    <Text fontSize="12px" color="gray.500">{status}</Text>
+                </Box>
+            </Flex>
+            {hasActions && (
+                <Flex gap={2}>
                     <IconButton
                         size="xs"
-
-                        variant="ghost"
-                        onClick={() => setIsEditing(true)}
-                    ><FiEdit2 /></IconButton>
-                </Flex>
-            ) : (
-                <Flex align="center" gap={2}>
-                    <Input
-                        size="sm"
-                        value={temp}
-                        onChange={(e) => setTemp(e.target.value)}
-                        autoFocus
-                    />
-                    <IconButton size="xs" colorScheme="green" onClick={save} ><FiCheck /></IconButton>
-                    <IconButton size="xs" colorScheme="red" onClick={cancel} ><FiX /></IconButton>
+                        bg="#de252c"
+                        borderRadius="full"
+                        onClick={onReject}
+                    >
+                        <FiX />
+                    </IconButton>
+                    <IconButton
+                        size="xs"
+                        bg="green"
+                        color={"white"}
+                        variant={"outline"}
+                        borderRadius="full"
+                        onClick={onAccept}
+                    >
+                        <FiCheck />
+                    </IconButton>
                 </Flex>
             )}
-        </Box>
+            {hasUnfriend && (
+                <Text fontSize={"xs"} color={"red"} cursor={"pointer"} fontWeight={"semibold"} onClick={onUnfriend}>Un Friend</Text>
+            )}
+        </Flex>
     );
 }
 
-export default function ProfileUI() {
-    const [email, setEmail] = useState("thinkmoves@exm.com");
-    const navigate = useNavigate()
 
+
+export default function ProfileUI() {
+    const [email, setEmail] = useState(null);
+    const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
     const [profile, setProfile] = useState(null);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editValue, setEditValue] = useState('');
+    const [friendsData, setFriendsData] = useState({
+        friends: [],
+        pendingInbound: [],
+        pendingOutbound: []
+    });
+    const [isAddFriendModalOpen, setIsAddFriendModalOpen] = useState(false);
     const token = localStorage.getItem("id_token");
 
     useEffect(() => {
         fetchProfile();
+        fetchFriendsOverview();
     }, []);
 
     const fetchProfile = async () => {
@@ -85,27 +108,158 @@ export default function ProfileUI() {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
-            console.log("PROFILE", res.data);
+            
             setProfile(res.data);
+            setEmail(res.data.userName);
+            setEditValue(res.data.userName);
 
         } catch (err) {
             console.error("Error fetching profile:", err);
         }
     };
 
+    const fetchFriendsOverview = async () => {
+        try {
+            const res = await axios.post(
+                `${BASE_URL}/api/Friends/GetFriendsOverview`, {},
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            console.log("FRIENDS", res.data);
+            setFriendsData(res.data);
+
+        } catch (err) {
+            console.error("Error fetching friends:", err);
+            if (err.status === 401) {
+                localStorage.clear();
+                window.location.href = "/login";
+            }
+        }
+    };
+
+    const handleSendFriendRequest = async (username) => {
+        try {
+            await axios.post(
+                `${BASE_URL}/api/Friends/SendFriendRequest?addFriendUserName=${username}&myUserName=${profile.userName}`,
+                {},
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            toaster.create({
+                title: "Friend Request Sent",
+                description: `Friend request sent to ${username}`,
+                type: "success",
+            });
+
+            fetchFriendsOverview();
+            return true;
+
+        } catch (error) {
+            console.error("Error sending friend request:", error);
+            toaster.create({
+                title: "Error",
+                description: error.response?.data || "Failed to send friend request",
+                type: "error",
+            });
+
+            if (error.status === 401) {
+                localStorage.clear();
+                window.location.href = "/login";
+            }
+            return false;
+        }
+    };
+
+    const handleAcceptFriendRequest = async (userId) => {
+        try {
+            await axios.post(
+                `${BASE_URL}/api/Friends/AcceptFriendRequest?addFriendUserName=${userId}`,
+                {},
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            toaster.create({
+                title: "Friend Request Accepted",
+                description: "You are now friends!",
+                type: "success",
+            });
+
+            fetchFriendsOverview();
+
+        } catch (error) {
+            console.error("Error accepting friend request:", error);
+            toaster.create({
+                title: "Error",
+                description: error.response?.data || "Failed to accept friend request",
+                type: "error",
+            });
+        }
+    };
+
+    const handleRejectFriendRequest = async (userId) => {
+        try {
+            await axios.post(
+                `${BASE_URL}/api/Friends/RejectFriendRequest?addFriendUserName=${userId}`,
+                {},
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            toaster.create({
+                title: "Friend Request Rejected",
+                description: "Friend request has been rejected",
+                type: "info",
+            });
+
+            fetchFriendsOverview();
+
+        } catch (error) {
+            console.error("Error rejecting friend request:", error);
+            toaster.create({
+                title: "Error",
+                description: error.response?.data || "Failed to reject friend request",
+                type: "error",
+            });
+        }
+    };
+    const handleUnfriend = async (userId) => {
+        try {
+            await axios.post(
+                `${BASE_URL}/api/Friends/UnFriend?otherUserName=${userId}`,
+                {},
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            toaster.create({
+                title: "Unfriend Successfully",
+                description: "Friend request has been rejected",
+                type: "info",
+            });
+
+            fetchFriendsOverview();
+
+        } catch (error) {
+            console.error("Error rejecting friend request:", error);
+            toaster.create({
+                title: "Error",
+                description: error.response?.data || "Failed to reject friend request",
+                type: "error",
+            });
+        }
+    };
+
     const handleLogout = () => {
         localStorage.clear();
-
         navigate("/");
     };
 
-    const updateUserName = async (newUserName) => {
+    const handleSave = async () => {
+        setLoading(true);
         try {
             const token = localStorage.getItem("id_token");
 
             await axios.post(
                 `${BASE_URL}/api/Profile/SetUserName`,
-                { userName: newUserName },
+                { userName: editValue },
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -119,22 +273,34 @@ export default function ProfileUI() {
                 type: "success",
             });
 
-            return true;
+            setEmail(editValue);
+            setIsEditing(false);
 
         } catch (error) {
             console.error("Error updating username:", error);
             if (error.status === 401) {
-                localStorage.clear()
-                window.location.href = "/login"
+                localStorage.clear();
+                window.location.href = "/login";
             }
             toaster.create({
                 title: "Error",
                 description: error.response?.data || "Failed to update username.",
                 type: "error",
             });
-
-            return false;
+        } finally {
+            setLoading(false);
         }
+    };
+
+    const formatTimeAgo = (timestamp) => {
+        const now = new Date();
+        const past = new Date(timestamp);
+        const diffInSeconds = Math.floor((now - past) / 1000);
+
+        if (diffInSeconds < 60) return "Just now";
+        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+        return `${Math.floor(diffInSeconds / 86400)} days ago`;
     };
 
     return (
@@ -145,7 +311,6 @@ export default function ProfileUI() {
                     { src: gradient1, left: "-20%", top: "-75%" },
                     { src: whitegradient1, right: "-20%", top: "-130%" },
                     { src: whitegradient, left: "-20%", top: "-130%" },
-
                 ].map((bg, i) => (
                     <Box
                         key={i}
@@ -158,7 +323,6 @@ export default function ProfileUI() {
                         <Image src={bg.src} alt="bg" w="100%" h="100%" objectFit="contain" />
                     </Box>
                 ))}
-
 
                 <Box
                     position="absolute"
@@ -181,132 +345,337 @@ export default function ProfileUI() {
                 >
                     <Image src={orb1} alt="orb" w="100%" h="100%" objectFit="contain" />
                 </Box>
-                <Container maxW="container.xl" px={{ base: 4, md: 8 }} py={32}>
+                <Container maxW="container.xl" px={{ base: 4, md: 8 }} py={32} position="relative" zIndex="2">
                     <div className="about-heading">
                         <h1 className="about-title">Your</h1>
                         <h1 className="about-gradient">Profile</h1>
                     </div>
                 </Container>
             </Box>
-            <Container maxW="container.xl" px={{ base: 4, md: 8 }} py={8}>
-                <Box p={8} bg="gray.50" minH="100vh">
-                    <Text fontSize="44px" fontWeight="bold" mb={6}>PROFILE</Text>
+            <Box position="relative" overflow="hidden" fontFamily="'Clash Display', sans-serif">
 
-                    <Flex gap={6} wrap="wrap">
-                        {/* LEFT PROFILE CARD */}
-                        <Box
-                            w="320px"
-                            p={4}
-                            borderRadius="lg"
-                            boxShadow="md"
-                            bg="white"
-                        >
-                            <Flex direction="column" align="center" gap={2}>
-                                {/* <Avatar size="xl" name="Chess" icon={<FaChess fontSize="42px" />} /> */}
-                                <AvatarGroup mb={2}>
-                                    <Avatar.Root width="80px" height="80px">
-                                        <Avatar.Fallback
-                                            fontSize="28px"
-                                            fontWeight="bold"
-                                        >
-                                            TM
-                                        </Avatar.Fallback>
+                <Box
+                    position="absolute"
+                    top="17%"
+                    left="15%"
+                    width="300px"
+                    height="300px"
+                    bg="red"
+                    borderRadius="full"
+                    filter="blur(100px)"
+                    opacity="0.3"
+                    zIndex="0"
+                />
+                <Box
+                    position="absolute"
+                    bottom="10%"
+                    left="20%"
+                    width="350px"
+                    height="350px"
+                    bg="red"
+                    borderRadius="full"
+                    filter="blur(110px)"
+                    opacity="0.2"
+                    zIndex="0"
+                />
+                <Box bg="#fef5f5" minH="100vh" py={8}>
+                    
+                    <Container maxW="container.xl" px={{ base: 4, md: 8 }}>
+                    <Heading fontSize={{ base: "2xl", sm: "4xl", md: "5xl", lg: "5xl" }} fontFamily="'Clash Display', sans-serif" color="black" fontWeight="600" mb={8}> Profile & Friends </Heading>
 
-                                        {/* If you have a profile image, add here */}
-                                        {/* <Avatar.Image src="/profile.jpg" alt="User" /> */}
-                                    </Avatar.Root>
-                                </AvatarGroup>
-                                <Text fontWeight="bold" fontSize="18px">
-                                    THINKMOVES#4832
-                                </Text>
+                        <Flex gap={6} wrap={{ base: "wrap", lg: "nowrap" }} align="flex-start">
+                            <Flex direction="column" gap={6} w={{ base: "100%", lg: "320px" }} flexShrink={0}>
 
-                                <EditableUsername
-                                    value={email}
-                                    onSave={async (newValue) => {
-                                        const ok = await updateUserName(newValue);
-                                        if (ok) setEmail(newValue);
-                                    }}
-                                />
+                                <Box
+                                    p={6}
+                                    borderRadius="3xl"
+                                    boxShadow="sm"
+                                    bg="white"
+                                    border="1px solid"
+                                    borderColor="gray.100"
+                                    w="100%"
+                                    position="relative"
+                                >
+                                    <Flex direction="column" gap={4}>
 
-                                <Box mt={4} w="100%">
-                                    <Flex justify="space-between" py={1}>
-                                        <Text>Player Rating:</Text><Text>4.5</Text>
-                                    </Flex>
-                                    <Flex justify="space-between" py={1}>
-                                        <Text>Games Saved:</Text><Text>4.5</Text>
-                                    </Flex>
-                                    <Flex justify="space-between" py={1}>
-                                        <Text>Positions Saved:</Text><Text>4.5</Text>
-                                    </Flex>
-                                    <Flex justify="space-between" py={1}>
-                                        <Text>Contributions:</Text><Text>4.5</Text>
+                                        <Flex align="center" justify="space-between">
+                                            <Flex align="center" gap={3}>
+                                                <AvatarGroup>
+                                                    <Avatar.Root size="xl">
+                                                        <Avatar.Fallback
+                                                            fontSize="16px"
+                                                            fontWeight="bold"
+                                                        >
+                                                            {email ? email.substring(0, 2).toUpperCase() : 'TM'}
+                                                        </Avatar.Fallback>
+                                                    </Avatar.Root>
+                                                </AvatarGroup>
+
+                                                <Box>
+                                                    <Text fontWeight="bold" fontSize="18px" color="gray.900">
+                                                        {email || 'THINKMOVES#4832'}
+                                                    </Text>
+                                                    <Text fontSize="14px" color="gray.600" mt={0.5}>
+                                                        @{email || 'thinkmoves@exm.com'}
+                                                    </Text>
+                                                </Box>
+                                            </Flex>
+
+
+                                            <IconButton
+                                                size="sm"
+                                                variant="ghost"
+                                                borderRadius="md"
+                                                bg="gray.50"
+                                                aria-label="Edit profile"
+                                                onClick={() => setIsEditing(!isEditing)}
+                                            >
+                                                <FiEdit2 size={16} />
+                                            </IconButton>
+                                        </Flex>
+
+
+                                        {isEditing && (
+                                            <Box w="100%" pl="76px">
+                                                <Input
+                                                    value={editValue}
+                                                    onChange={(e) => setEditValue(e.target.value)}
+                                                    placeholder="Enter username"
+                                                    size="md"
+                                                    borderRadius="lg"
+                                                    onKeyPress={(e) => e.key === 'Enter' && handleSave()}
+                                                    disabled={loading}
+                                                    autoFocus
+                                                />
+                                                <Flex gap={2} mt={2}>
+                                                    <Button
+                                                        size="sm"
+                                                        colorScheme="red"
+                                                        onClick={handleSave}
+                                                        loading={loading}
+                                                        flex={1}
+                                                    >
+                                                        Save
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={() => {
+                                                            setIsEditing(false);
+                                                            setEditValue(email);
+                                                        }}
+                                                        flex={1}
+                                                    >
+                                                        Cancel
+                                                    </Button>
+                                                </Flex>
+                                            </Box>
+                                        )}
+
+
+                                        <Box w="100%" h="1px" bg="gray.100" />
+
+
+                                        <Box w="100%">
+                                            <Flex align="center" justify="space-between" py={3}>
+                                                <Text fontSize="15px" color="gray.700">⭐ Player Rating:</Text>
+                                                <Text fontSize="15px" fontWeight="semibold" color="gray.900">{profile?.rating || 0}</Text>
+                                            </Flex>
+                                            <Flex align="center" justify="space-between" py={3}>
+                                                <Text fontSize="15px" color="gray.700">🎯 Games Saved:</Text>
+                                                <Text fontSize="15px" fontWeight="semibold" color="gray.900">{profile?.totalGamesSaved || 0}</Text>
+                                            </Flex>
+                                            <Flex align="center" justify="space-between" py={3}>
+                                                <Text fontSize="15px" color="gray.700">📍 Positions Saved:</Text>
+                                                <Text fontSize="15px" fontWeight="semibold" color="gray.900">{profile?.totalPositionsSaved || 0}</Text>
+                                            </Flex>
+                                            <Flex align="center" justify="space-between" py={3}>
+                                                <Text fontSize="15px" color="gray.700">💡 Contributions:</Text>
+                                                <Text fontSize="15px" fontWeight="semibold" color="gray.900">{profile?.totalContribsSubmitted || 0}</Text>
+                                            </Flex>
+                                        </Box>
+
+                                        <Flex alignItems={"center"} justifyContent={"space-between"}>
+                                            <Button
+                                                w="80%"
+
+                                                onClick={handleLogout}
+                                                borderRadius="full"
+                                                size="lg"
+                                                variant="outline"
+                                                borderColor="gray.300"
+                                                color="gray.700"
+                                                fontWeight="medium"
+                                                fontSize="14px"
+                                                _hover={{
+                                                    bg: 'gray.50'
+                                                }}
+                                            >
+                                                LOGOUT
+                                            </Button>
+
+
+
+                                            <IconButton
+
+                                                size="md"
+                                                borderRadius="full"
+                                                bg="#DE252C"
+                                                color="white"
+                                                aria-label="Go to profile"
+                                                _hover={{
+                                                    bg: 'red.200'
+                                                }}
+                                            >
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                                    <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                </svg>
+                                            </IconButton>
+                                        </Flex>
                                     </Flex>
                                 </Box>
 
-                                <Button colorScheme="red" w="100%" mt={6} onClick={handleLogout}>
-                                    LOGOUT
-                                </Button>
+
+                                <Box
+                                    p={6}
+                                    borderRadius="xl"
+                                    boxShadow="sm"
+                                    bg="white"
+                                    border="1px solid #f0f0f0"
+                                >
+                                    <Text fontWeight="bold" fontSize="18px" mb={4}>
+                                        FRIENDS
+                                    </Text>
+
+                                    <Flex direction="column" gap={3} mb={4}>
+
+                                        {friendsData.friends.length > 0 ? (
+                                            friendsData.friends.map((friend) => (
+                                                <FriendItem
+                                                    key={friend.userId}
+                                                    name={friend.userName}
+                                                    status={formatTimeAgo(friend.sinceOrUpdatedAt)}
+                                                    hasActions={false}
+                                                    hasUnfriend={true}
+                                                    onUnfriend={() => handleUnfriend(friend.userName)}
+                                                />
+                                            ))
+                                        ) : null}
+
+
+                                        {friendsData.pendingInbound.map((request) => (
+                                            <FriendItem
+                                                key={request.userId}
+                                                name={request.userName}
+                                                status={`Request ${formatTimeAgo(request.sinceOrUpdatedAt)}`}
+                                                hasActions={true}
+                                                onAccept={() => handleAcceptFriendRequest(request.userName)}
+                                                onReject={() => handleRejectFriendRequest(request.userName)}
+                                                
+                                            />
+                                        ))}
+
+
+                                        {friendsData.pendingOutbound.map((request) => (
+                                            <FriendItem
+                                                key={request.userId}
+                                                name={request.userName}
+                                                status={`Sent ${formatTimeAgo(request.sinceOrUpdatedAt)}`}
+                                                hasActions={false}
+                                            />
+                                        ))}
+
+                                        {friendsData.friends.length === 0 &&
+                                            friendsData.pendingInbound.length === 0 &&
+                                            friendsData.pendingOutbound.length === 0 && (
+                                                <Text textAlign="center" color="gray.500" py={4}>
+                                                    No friends yet. Add some friends!
+                                                </Text>
+                                            )}
+                                    </Flex>
+
+                                    <Flex justify="space-between" mb={4} pt={4} borderTop="1px solid #f0f0f0">
+                                        <Box textAlign="center">
+                                            <Text fontSize="24px" fontWeight="bold">{friendsData.pendingOutbound.length}</Text>
+                                            <Text fontSize="11px" color="gray.500">FRIENDS REQUEST SENT</Text>
+                                        </Box>
+                                        <Box textAlign="center">
+                                            <Text fontSize="24px" fontWeight="bold">{friendsData.pendingInbound.length}</Text>
+                                            <Text fontSize="11px" color="gray.500">FRIENDS INCOMING REQUEST</Text>
+                                        </Box>
+                                    </Flex>
+
+                                    <Button
+                                        w="100%"
+                                        variant="outline"
+                                        borderRadius="full"
+                                        leftIcon={<FiUserPlus />}
+                                        colorScheme="red"
+                                        onClick={() => setIsAddFriendModalOpen(true)}
+                                    >
+                                        ENTER USERNAME
+                                    </Button>
+                                </Box>
                             </Flex>
-                        </Box>
 
-                        {/* RIGHT CONTENT */}
-                        <Flex direction="column" flex={1} gap={6}>
-                            {/* GAMEPLAY INSIGHTS */}
-                            <Box p={4} borderRadius="lg" boxShadow="md" bg="white">
-                                <Text fontWeight="bold" fontSize="20px" mb={4}>
-                                    ♟ GAMEPLAY INSIGHTS
-                                </Text>
+                            {/* RIGHT SIDE CONTENT */}
+                            <Flex direction="column" flex={1} gap={6} w="100%">
+                                <Box
+                                    p={6}
+                                    borderRadius="xl"
+                                    boxShadow="sm"
+                                    bg="white"
+                                    border="1px solid #f0f0f0"
+                                    flex="1"
+                                    display="flex"
+                                    flexDirection="column"
+                                    height="100%"
+                                >
+                                    <Flex align="center" gap={2} mb={4}>
+                                        <Text fontSize="20px">♟️</Text>
+                                        <Text fontWeight="bold" fontSize="18px">
+                                            GAMEPLAY INSIGHTS
+                                        </Text>
+                                    </Flex>
 
-                                <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
-                                    <StatBox title="MOST PLAYED OPENING" value="Sicilian Defense (820)" />
-                                    <StatBox title="WIN/LOSS/DRAW" value="31W | 21L | 20D" />
-                                    <StatBox title="WIN RATE AS WHITE" value="60% (57/5)" />
-                                    <StatBox title="WIN RATE AS BLACK" value="33% (11/3)" />
-                                    <StatBox title="AVG. GAME LENGTH" value="32 moves" />
-                                </SimpleGrid>
-                            </Box>
+                                    <Flex flex="1" align="center" justify="center">
+                                        <Text>Coming Soon</Text>
+                                    </Flex>
+                                </Box>
 
-                            {/* ADVANCED STATS */}
-                            <Box p={4} borderRadius="lg" boxShadow="md" bg="white">
-                                <Text fontWeight="bold" fontSize="20px" mb={4}>
-                                    📊 ADVANCED STATS
-                                </Text>
+                                <Box
+                                    p={6}
+                                    borderRadius="xl"
+                                    boxShadow="sm"
+                                    bg="white"
+                                    border="1px solid #f0f0f0"
+                                    flex="1"
+                                    display="flex"
+                                    flexDirection="column"
+                                >
+                                    <Flex align="center" gap={2} mb={4}>
+                                        <Text fontSize="20px">📊</Text>
+                                        <Text fontWeight="bold" fontSize="18px">
+                                            ADVANCED STATS
+                                        </Text>
+                                    </Flex>
 
-                                <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
-                                    <StatBox title="BLUNDERS PER GAME" value="1.6" />
-                                    <StatBox title="BEST GAME ACCURACY" value="92%" />
-                                    <StatBox title="GAME MISTAKE SUMMARY" value="Blunders: 5 | Mistakes: 8 | Inaccuracies: 12" />
-                                    <StatBox title="RAPID WIN RATE" value="85%" />
-                                    <StatBox title="BLITZ WIN RATE" value="40%" />
-                                    <StatBox title="BULLET WIN RATE" value="20%" />
-                                    <StatBox title="ENDGAME CONVERSION" value="Won: 70% | Drawn: 20% | Lost: 10%" />
-                                    <StatBox title="GAME QUALITY TREND" value="Accuracy ↑ 12% over last 10 games" />
-                                    <StatBox title="OPENING DIVERSITY" value="4 as White | 2 as Black" />
-                                </SimpleGrid>
-                            </Box>
+                                    <Flex flex="1" align="center" justify="center">
+                                        <Text>Coming Soon</Text>
+                                    </Flex>
+                                </Box>
+                            </Flex>
                         </Flex>
-                    </Flex>
+                    </Container>
                 </Box>
-            </Container>
+            </Box>
+
+
+            <AddFriendModal
+                isOpen={isAddFriendModalOpen}
+                onClose={() => setIsAddFriendModalOpen(false)}
+                onSendRequest={handleSendFriendRequest}
+            />
         </>
-
-    );
-}
-
-function StatBox({ title, value }) {
-    return (
-        <Box
-            p={4}
-            borderRadius="md"
-            border="1px solid #e2e8f0"
-            bg="white"
-        >
-            <Text fontSize="12px" color="gray.500" fontWeight="semibold">
-                {title}
-            </Text>
-            <Text fontSize="16px" mt={1} fontWeight="bold">
-                {value}
-            </Text>
-        </Box>
     );
 }

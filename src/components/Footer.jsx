@@ -143,11 +143,12 @@ export default function Footer() {
                             <Heading size="sm" fontWeight="600" mb={2}>
                                 Quick Links
                             </Heading>
-                            <Link href="#" color="gray.300">About</Link>
-                            <Link href="#" color="gray.300">Analyse</Link>
-                            <Link href="#" color="gray.300">Library</Link>
-                            <Link href="#" color="gray.300">Products</Link>
-                            <Link href="#" color="gray.300">Login</Link>
+                            <Link href="/about" color="gray.300">About</Link>
+                            {/* <Link href="#" color="gray.300">Analyse</Link> */}
+                            <Link href="/library" color="gray.300">Library</Link>
+                            {/* <Link href="#" color="gray.300">Products</Link> */}
+                            <Link href="/login" color="gray.300">Login</Link>
+                            <Link href="/feedback" color="gray.300">Feed Back</Link>
                         </VStack>
 
                         <VStack align="flex-start" spacing={3}>
@@ -232,7 +233,7 @@ export default function Footer() {
                 whiteSpace="nowrap"
                 overflow="hidden"
             >
-                THINK MOVES
+                THINKMOVES
             </Box>
         </Box>
     );

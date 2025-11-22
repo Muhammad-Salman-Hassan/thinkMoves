@@ -35,7 +35,7 @@ export default function Navbar() {
     const NavLinks = () => {
         const links = [
             { name: "Home", to: "/" },
-            { name: "Analyse", to: "/analyze" },
+            // { name: "Analyse", to: "/analyze" },
             { name: "Library", to: "/library" },
             { name: "About", to: "/about-us" },
         ];
@@ -87,20 +87,15 @@ export default function Navbar() {
                         </HStack>
 
                         {token ? (
-                            <Button
+                            <IconButton
                                 onClick={handleNavigate}
-                                bg="#D32C32"
-                                color="white"
-                                _hover={{ bg: "#b92027" }}
-                                borderRadius="14.82px"
-                                px="16px"
-                                py="10px"
-                                rightIcon={<FaArrowRight />}
-                                border="1.65px solid #D32C32"
+                                bg={"transparent"}
+                                color={"black"}
                                 gap="10px"
+                                fontSize={"25px"}
                             >
                                 <RiProfileFill />
-                            </Button>
+                            </IconButton>
                         ) : (
                             <HStack spacing={4}>
                                 <Button
@@ -119,7 +114,7 @@ export default function Navbar() {
                                 >
                                     Login
                                 </Button>
-                                <Button
+                                {/* <Button
                                     as={Link}
                                     to="/signup"
                                     bg="#D32C32"
@@ -134,7 +129,7 @@ export default function Navbar() {
                                     onClick={onClose}
                                 >
                                     Signup
-                                </Button>
+                                </Button> */}
                             </HStack>
                         )}
                     </Flex>
