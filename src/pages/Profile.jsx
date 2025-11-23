@@ -685,7 +685,7 @@ export default function ProfileUI() {
                                         </Box>
 
 
-                                        <Button
+                                        {/* <Button
                                             w="100%"
                                             variant="outline"
                                             borderRadius="full"
@@ -694,7 +694,7 @@ export default function ProfileUI() {
                                             onClick={() => setIsAddFriendModalOpen(true)}
                                         >
                                             ADD FRIEND
-                                        </Button>
+                                        </Button> */}
                                     </Flex>
 
                                     <Flex justify="space-between" mb={4} p={2} borderTop="1px solid #f0f0f0">
@@ -736,7 +736,7 @@ export default function ProfileUI() {
                                     height="100%"
                                 >
                                     <Flex align="center" gap={2} mb={4}>
-                                        <Text fontSize="20px">♟️</Text>
+                                       
                                         <Text fontWeight="bold" fontSize="18px">
                                             GAMEPLAY INSIGHTS
                                         </Text>
@@ -758,7 +758,7 @@ export default function ProfileUI() {
                                     flexDirection="column"
                                 >
                                     <Flex align="center" gap={2} mb={4}>
-                                        <Text fontSize="20px">📊</Text>
+                                       
                                         <Text fontWeight="bold" fontSize="18px">
                                             ADVANCED STATS
                                         </Text>
