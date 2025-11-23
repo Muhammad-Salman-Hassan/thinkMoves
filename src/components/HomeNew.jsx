@@ -797,6 +797,41 @@ export default function HomeNew({ isEdit }) {
 
                                     </Button>
                                 </HStack>
+                                <HStack
+                                    spacing={[2, 4]}
+                                    wrap="wrap"
+                                    justify="center"
+                                    align="center"
+                                    w="full"
+                                >
+                                    <Button
+                                        bg="#D32C32"
+                                        color="white"
+                                        height="45px"
+                                        onClick={() => openImageModal("game")}
+                                        disabled={previewUrls.length === 0}
+                                        borderRadius={"14.82px"}
+                                        border={"1px solid"}
+                                        width={["100%", "200px"]}
+
+                                        borderColor={"linear-gradient(265.38deg, rgba(255, 255, 255, 0.6) 24.8%, rgba(255, 255, 255, 0.3) 85.32%)"}
+                                    >
+                                        Game Images <Box bg={"black"} p={1} borderRadius={"full"} border={"1px solid white"}> <IoMdArrowRoundForward /></Box>
+                                    </Button>
+                                    <Button
+                                        bg="#D32C32"
+                                        color="white"
+                                        height="45px"
+                                        onClick={() => openImageModal("moves")}
+                                        borderRadius={"14.82px"}
+                                        border={"1px solid"}
+                                        width={["100%", "200px"]}
+
+                                        borderColor={"linear-gradient(265.38deg, rgba(255, 255, 255, 0.6) 24.8%, rgba(255, 255, 255, 0.3) 85.32%)"}
+                                    >
+                                        Moves Images <Box bg={"black"} p={1} borderRadius={"full"} border={"1px solid white"}> <IoMdArrowRoundForward /></Box>
+                                    </Button>
+                                </HStack>
                             </VStack>
 
                         </VStack>
@@ -824,31 +859,8 @@ export default function HomeNew({ isEdit }) {
                             </InputGroup>
 
 
-                            <SimpleGrid columns={{ base: 1, md: 3, lg: 2 }} gap={4}>
-                                {/* <Field.Root >
-                                    <Field.Label color="white">Correct Moves</Field.Label>
-                                    <Textarea
-                                        name="correctMoves"
-                                        value={formData.correctMoves}
-                                        onChange={handleChange}
-                                        placeholder="Correct Moves"
-                                        bg="white"
-                                        color="black"
-                                        height="120px"
-                                    />
-                                </Field.Root>
-                                <Field.Root >
-                                    <Field.Label color="white">Remaining Moves</Field.Label>
-                                    <Textarea
-                                        name="remainingMoves"
-                                        value={formData.remainingMoves}
-                                        onChange={handleChange}
-                                        placeholder="Remaining Moves"
-                                        bg="white"
-                                        color="black"
-                                        height="120px"
-                                    />
-                                </Field.Root> */}
+                            <SimpleGrid columns={{ base: 1, md: 3, lg: 1 }} gap={4}>
+                                
                                 <Field.Root w={"100%"}>
                                     <Field.Label color="white">Suggested Moves</Field.Label>
                                     <Box bg="white" color="black" p={2} borderRadius="md" height="120px" overflowY="auto" w={"100%"}>
@@ -875,91 +887,7 @@ export default function HomeNew({ isEdit }) {
                                     </Box>
 
                                 </Field.Root>
-                                <Box width="100%">
-                                    <SimpleGrid columns={{ base: 1, md: 2, lg: 1 }} gap={2} width="100%" mb={2}>
-
-                                        <HStack spacing={4} width="100%">
-                                            <Button
-                                                bg="#D32C32"
-                                                color="white"
-                                                height="45px"
-                                                flex="1"
-                                                disabled={!token}
-                                                onClick={handleOpenPositionModal}
-                                                borderRadius={"14.82px"}
-                                                border={"1px solid"}
-                                                borderColor={"linear-gradient(265.38deg, rgba(255, 255, 255, 0.6) 24.8%, rgba(255, 255, 255, 0.3) 85.32%)"}
-                                            >
-                                                Save Position <Box bg={"black"} p={1} borderRadius={"full"} border={"1px solid white"}> <IoMdArrowRoundForward /></Box>
-                                            </Button>
-                                            <Button
-                                                bg="#D32C32"
-                                                color="white"
-                                                height="45px"
-                                                flex="1"
-                                                disabled={!token}
-                                                onClick={handleOpenSaveModal}
-                                                borderRadius={"14.82px"}
-                                                border={"1px solid"}
-                                                borderColor={"linear-gradient(265.38deg, rgba(255, 255, 255, 0.6) 24.8%, rgba(255, 255, 255, 0.3) 85.32%)"}
-                                            >
-                                                {isEdit ? "Update game" : "Save Game"}  <Box bg={"black"} p={1} borderRadius={"full"} border={"1px solid white"}> <IoMdArrowRoundForward /></Box>
-                                            </Button>
-                                        </HStack>
-
-
-                                        <HStack spacing={4} width="100%">
-                                            <Button
-                                                bg="#D32C32"
-                                                color="white"
-                                                height="45px"
-                                                flex="1"
-                                                disabled={!token}
-                                                borderRadius={"14.82px"}
-                                                border={"1px solid"}
-                                                borderColor={"linear-gradient(265.38deg, rgba(255, 255, 255, 0.6) 24.8%, rgba(255, 255, 255, 0.3) 85.32%)"}
-                                            >
-                                                Share Position <Box bg={"black"} p={1} borderRadius={"full"} border={"1px solid white"}> <IoMdArrowRoundForward /></Box>
-                                            </Button>
-                                            <Button
-                                                bg="#D32C32"
-                                                color="white"
-                                                height="45px"
-                                                flex="1"
-                                                borderRadius={"14.82px"}
-                                                border={"1px solid"}
-                                                borderColor={"linear-gradient(265.38deg, rgba(255, 255, 255, 0.6) 24.8%, rgba(255, 255, 255, 0.3) 85.32%)"}
-                                            >
-                                                Share Game <Box bg={"black"} p={1} borderRadius={"full"} border={"1px solid white"}> <IoMdArrowRoundForward /></Box>
-                                            </Button>
-                                        </HStack>
-                                    </SimpleGrid>
-                                    <SimpleGrid columns={{ base: 1, sm: 2 }} gap={4}>
-                                        <Button
-                                            bg="#D32C32"
-                                            color="white"
-                                            height="45px"
-                                            onClick={() => openImageModal("game")}
-                                            disabled={previewUrls.length === 0}
-                                            borderRadius={"14.82px"}
-                                            border={"1px solid"}
-                                            borderColor={"linear-gradient(265.38deg, rgba(255, 255, 255, 0.6) 24.8%, rgba(255, 255, 255, 0.3) 85.32%)"}
-                                        >
-                                            Game Images <Box bg={"black"} p={1} borderRadius={"full"} border={"1px solid white"}> <IoMdArrowRoundForward /></Box>
-                                        </Button>
-                                        <Button
-                                            bg="#D32C32"
-                                            color="white"
-                                            height="45px"
-                                            onClick={() => openImageModal("moves")}
-                                            borderRadius={"14.82px"}
-                                            border={"1px solid"}
-                                            borderColor={"linear-gradient(265.38deg, rgba(255, 255, 255, 0.6) 24.8%, rgba(255, 255, 255, 0.3) 85.32%)"}
-                                        >
-                                            Moves Images <Box bg={"black"} p={1} borderRadius={"full"} border={"1px solid white"}> <IoMdArrowRoundForward /></Box>
-                                        </Button>
-                                    </SimpleGrid>
-                                </Box>
+                                
 
 
 
@@ -1108,10 +1036,72 @@ export default function HomeNew({ isEdit }) {
                                             );
                                         })}
                                 </SimpleGrid>
+
+                                
                             </Box>
 
 
+                            <Box width="100%">
+                                    <SimpleGrid columns={{ base: 1, md: 2, lg: 1 }} gap={2} width="100%" mb={2}>
 
+                                        <HStack spacing={4} width="100%">
+                                            <Button
+                                                bg="#D32C32"
+                                                color="white"
+                                                height="45px"
+                                                flex="1"
+                                                disabled={!token}
+                                                onClick={handleOpenPositionModal}
+                                                borderRadius={"14.82px"}
+                                                border={"1px solid"}
+                                                borderColor={"linear-gradient(265.38deg, rgba(255, 255, 255, 0.6) 24.8%, rgba(255, 255, 255, 0.3) 85.32%)"}
+                                            >
+                                                Save Position <Box bg={"black"} p={1} borderRadius={"full"} border={"1px solid white"}> <IoMdArrowRoundForward /></Box>
+                                            </Button>
+                                            <Button
+                                                bg="#D32C32"
+                                                color="white"
+                                                height="45px"
+                                                flex="1"
+                                                disabled={!token}
+                                                onClick={handleOpenSaveModal}
+                                                borderRadius={"14.82px"}
+                                                border={"1px solid"}
+                                                borderColor={"linear-gradient(265.38deg, rgba(255, 255, 255, 0.6) 24.8%, rgba(255, 255, 255, 0.3) 85.32%)"}
+                                            >
+                                                {isEdit ? "Update game" : "Save Game"}  <Box bg={"black"} p={1} borderRadius={"full"} border={"1px solid white"}> <IoMdArrowRoundForward /></Box>
+                                            </Button>
+                                        </HStack>
+
+
+                                        <HStack spacing={4} width="100%">
+                                            <Button
+                                                bg="#D32C32"
+                                                color="white"
+                                                height="45px"
+                                                flex="1"
+                                                disabled={!token}
+                                                borderRadius={"14.82px"}
+                                                border={"1px solid"}
+                                                borderColor={"linear-gradient(265.38deg, rgba(255, 255, 255, 0.6) 24.8%, rgba(255, 255, 255, 0.3) 85.32%)"}
+                                            >
+                                                Share Position <Box bg={"black"} p={1} borderRadius={"full"} border={"1px solid white"}> <IoMdArrowRoundForward /></Box>
+                                            </Button>
+                                            <Button
+                                                bg="#D32C32"
+                                                color="white"
+                                                height="45px"
+                                                flex="1"
+                                                borderRadius={"14.82px"}
+                                                border={"1px solid"}
+                                                borderColor={"linear-gradient(265.38deg, rgba(255, 255, 255, 0.6) 24.8%, rgba(255, 255, 255, 0.3) 85.32%)"}
+                                            >
+                                                Share Game <Box bg={"black"} p={1} borderRadius={"full"} border={"1px solid white"}> <IoMdArrowRoundForward /></Box>
+                                            </Button>
+                                        </HStack>
+                                    </SimpleGrid>
+
+                                </Box>
 
 
 

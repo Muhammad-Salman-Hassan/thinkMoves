@@ -301,72 +301,84 @@ const About = () => {
                     </div>
 
                     <VStack spacing={12} textAlign="center" align="center" w="full" mt={8}>
-    <Flex justify="center" w="full" px={{ base: 0, md: 4 }}>
-        <Box
-            bg="white"
-            borderRadius={{ base: "none", md: "2xl" }}
-            boxShadow={{ base: "none", md: "xl" }}
-            p={{ base: 4, sm: 6, md: 12 }}
-            w="full"
-            maxW="4xl"
-            position="relative"
-            overflow="hidden"
-        >
-            {/* Decorative gradient overlay */}
-            <Box
-                position="absolute"
-                top="-50%"
-                right="-10%"
-                width="300px"
-                height="300px"
-                bg="red.500"
-                borderRadius="full"
-                filter="blur(100px)"
-                opacity="0.1"
-                zIndex="0"
-            />
+                        <Flex justify="center" w="full" px={{ base: 0, md: 4 }}>
+                            <Box
+                                bg="white"
+                                borderRadius={{ base: "none", md: "2xl" }}
+                                boxShadow={{ base: "none", md: "xl" }}
+                                p={{ base: 4, sm: 6, md: 12 }}
+                                w="full"
+                                maxW="4xl"
+                                position="relative"
+                                overflow="hidden"
+                            >
 
-            <VStack spacing={6} align="stretch" position="relative" zIndex="1">
-                <Flex align="start" gap={4}>
-                    <Box flex="1">
-                        <Heading 
-                            size={{ base: "md", md: "lg" }} 
-                            color="gray.800" 
-                            mb={2}
-                        >
-                            ThinkMoves Books & Scorebooks
-                        </Heading>
-                        <Text color="gray.600" fontSize="sm">
-                            Interest Form - Help us decide what to print first
-                        </Text>
-                    </Box>
-                </Flex>
+                                <Box
+                                    position="absolute"
+                                    top="0%"
+                                    right="-10%"
+                                    width="300px"
+                                    height="300px"
+                                    bg="red"
+                                    borderRadius="full"
+                                    filter="blur(80px)"
+                                    opacity="0.1"
+                                    zIndex="0"
+                                />
+                                <Box
+                                    position="absolute"
+                                    top="50%"
+                                    left="-10%"
+                                    width="300px"
+                                    height="300px"
+                                    bg="red"
+                                    borderRadius="full"
+                                    filter="blur(80px)"
+                                    opacity="0.1"
+                                    zIndex="0"
+                                />
 
-                <Box h="1px" bg="gray.200" />
+                                <VStack spacing={6} align="stretch" position="relative" zIndex="1">
+                                    <Flex align="start" gap={4}>
+                                        <Box flex="1">
+                                            <Heading
+                                                size={{ base: "md", md: "lg" }}
+                                                color="gray.800"
+                                                mb={2}
+                                            >
+                                                ThinkMoves Books & Scorebooks
+                                            </Heading>
+                                            <Text color="gray.600" fontSize="sm">
+                                                Interest Form - Help us decide what to print first
+                                            </Text>
+                                        </Box>
+                                    </Flex>
 
-                <Box mx={{ base: -4, sm: -6, md: 0 }}>
-                    <Box
-                        as="iframe"
-                        src="https://forms.gle/aC6RX7K5szCqDZVw5 "
-                        width="100%"
-                        height={{ base: "600px", md: "800px" }}
-                        borderRadius={{ base: "none", md: "lg" }}
-                        border="none"
-                    />
-                </Box>
+                                    <Box h="1px" bg="gray.200" />
 
-                <Text
-                    color="gray.500"
-                    fontSize="sm"
-                    textAlign="center"
-                    fontStyle="italic"
-                >
-                    Thank you for helping shape the first batch of ThinkMoves books & merch! 🎉
-                </Text>
-            </VStack>
-        </Box>
-    </Flex>
-</VStack>
+                                    <Box mx={{ base: -4, sm: -6, md: 0 }}>
+                                        <Box
+                                            as="iframe"
+                                            src="https://forms.gle/aC6RX7K5szCqDZVw5 "
+                                            width="100%"
+                                            height={{ base: "600px", md: "800px" }}
+                                            borderRadius={{ base: "none", md: "lg" }}
+                                            border="none"
+                                        />
+                                    </Box>
+
+                                    <Text
+                                        color="gray.500"
+                                        fontSize="sm"
+                                        textAlign="center"
+                                        fontStyle="italic"
+                                    >
+                                        Thank you for helping shape the first batch of ThinkMoves books & merch! 🎉
+                                    </Text>
+                                </VStack>
+                            </Box>
+                        </Flex>
+                    </VStack>
                 </Container>
             </Box>
 
