@@ -10,14 +10,11 @@ import {
     Container,
     Avatar,
     AvatarGroup,
-    Dialog,
-    Portal,
-    VStack,
-    HStack,
+    
     Heading,
 } from "@chakra-ui/react";
 import { FiEdit2, FiX, FiCheck, FiUserPlus } from "react-icons/fi";
-import { FaTimes } from "react-icons/fa";
+
 import orb1 from "../assets/orb1.png";
 import gradient from "../assets/gradientbg.png";
 import gradient1 from "../assets/gradientbg1.png";
@@ -108,7 +105,7 @@ export default function ProfileUI() {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
-            
+
             setProfile(res.data);
             setEmail(res.data.userName);
             setEditValue(res.data.userName);
@@ -257,7 +254,7 @@ export default function ProfileUI() {
         try {
             const token = localStorage.getItem("id_token");
 
-            await axios.post(
+            const response = await axios.post(
                 `${BASE_URL}/api/Profile/SetUserName`,
                 { userName: editValue },
                 {
@@ -267,31 +264,67 @@ export default function ProfileUI() {
                 }
             );
 
-            toaster.create({
-                title: "Username updated",
-                description: "Your username has been successfully changed.",
-                type: "success",
-            });
+            if (response.status === 200) {
+                toaster.create({
+                    title: "Username updated",
+                    description: "Your username has been successfully changed.",
+                    type: "success",
+                });
 
-            setEmail(editValue);
-            setIsEditing(false);
+                setEmail(editValue);
+                setIsEditing(false);
+            }
 
         } catch (error) {
             console.error("Error updating username:", error);
-            if (error.status === 401) {
+
+            let errorMessage = "Failed to update username";
+
+            if (error.response?.data) {
+                const errorData = error.response.data;
+
+
+                if (typeof errorData === 'string') {
+                    errorMessage = errorData;
+                } else if (errorData.setUserNameresponse) {
+                    errorMessage = errorData.setUserNameresponse;
+                } else if (errorData.errors && errorData.errors.length > 0) {
+                    errorMessage = errorData.errors.join(', ');
+                } else if (errorData.message) {
+                    errorMessage = errorData.message;
+                }
+            }
+
+
+            errorMessage = String(errorMessage);
+
+
+            if (error.response?.status === 409) {
+                toaster.create({
+                    title: "Username Not Available",
+                    description: errorMessage,
+                    type: "warning",
+                });
+                return;
+            }
+
+
+            if (error.response?.status === 401) {
                 localStorage.clear();
                 window.location.href = "/login";
+                return;
             }
+
             toaster.create({
                 title: "Error",
-                description: error.response?.data || "Failed to update username.",
-                type: "error",
+                description: errorMessage,
+                type: "warning",
             });
+
         } finally {
             setLoading(false);
         }
     };
-
     const formatTimeAgo = (timestamp) => {
         const now = new Date();
         const past = new Date(timestamp);
@@ -379,9 +412,9 @@ export default function ProfileUI() {
                     zIndex="0"
                 />
                 <Box bg="#fef5f5" minH="100vh" py={8}>
-                    
+
                     <Container maxW="container.xl" px={{ base: 4, md: 8 }}>
-                    <Heading fontSize={{ base: "2xl", sm: "4xl", md: "5xl", lg: "5xl" }} fontFamily="'Clash Display', sans-serif" color="black" fontWeight="600" mb={8}> Profile & Friends </Heading>
+                        <Heading fontSize={{ base: "2xl", sm: "4xl", md: "5xl", lg: "5xl" }} fontFamily="'Clash Display', sans-serif" color="black" fontWeight="600" mb={8}> Profile & Friends </Heading>
 
                         <Flex gap={6} wrap={{ base: "wrap", lg: "nowrap" }} align="flex-start">
                             <Flex direction="column" gap={6} w={{ base: "100%", lg: "320px" }} flexShrink={0}>
@@ -537,64 +570,134 @@ export default function ProfileUI() {
 
 
                                 <Box
-                                    p={6}
+                                  
                                     borderRadius="xl"
                                     boxShadow="sm"
                                     bg="white"
                                     border="1px solid #f0f0f0"
                                 >
-                                    <Text fontWeight="bold" fontSize="18px" mb={4}>
-                                        FRIENDS
-                                    </Text>
-
-                                    <Flex direction="column" gap={3} mb={4}>
-
-                                        {friendsData.friends.length > 0 ? (
-                                            friendsData.friends.map((friend) => (
-                                                <FriendItem
-                                                    key={friend.userId}
-                                                    name={friend.userName}
-                                                    status={formatTimeAgo(friend.sinceOrUpdatedAt)}
-                                                    hasActions={false}
-                                                    hasUnfriend={true}
-                                                    onUnfriend={() => handleUnfriend(friend.userName)}
-                                                />
-                                            ))
-                                        ) : null}
 
 
-                                        {friendsData.pendingInbound.map((request) => (
-                                            <FriendItem
-                                                key={request.userId}
-                                                name={request.userName}
-                                                status={`Request ${formatTimeAgo(request.sinceOrUpdatedAt)}`}
-                                                hasActions={true}
-                                                onAccept={() => handleAcceptFriendRequest(request.userName)}
-                                                onReject={() => handleRejectFriendRequest(request.userName)}
-                                                
-                                            />
-                                        ))}
+                                    <Flex direction="column" gap={6} w={{ base: "100%", lg: "320px" }} flexShrink={0} p={2}>
 
 
-                                        {friendsData.pendingOutbound.map((request) => (
-                                            <FriendItem
-                                                key={request.userId}
-                                                name={request.userName}
-                                                status={`Sent ${formatTimeAgo(request.sinceOrUpdatedAt)}`}
-                                                hasActions={false}
-                                            />
-                                        ))}
+                                        <Box
 
-                                        {friendsData.friends.length === 0 &&
-                                            friendsData.pendingInbound.length === 0 &&
-                                            friendsData.pendingOutbound.length === 0 && (
-                                                <Text textAlign="center" color="gray.500" py={4}>
-                                                    No friends yet. Add some friends!
+                                            borderRadius="xl"
+
+                                            bg="white"
+
+                                        >
+                                            <Flex align="center" justify="space-between" mb={4}>
+                                                <Text fontWeight="bold" fontSize="18px">
+                                                    FRIENDS ({friendsData.friends.length})
                                                 </Text>
-                                            )}
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    colorScheme="red"
+                                                    onClick={() => setIsAddFriendModalOpen(true)}
+                                                >
+                                                    <FiUserPlus />
+                                                </Button>
+                                            </Flex>
+
+                                            <Flex direction="column" gap={3}>
+                                                {friendsData.friends.length > 0 ? (
+                                                    friendsData.friends.map((friend) => (
+                                                        <FriendItem
+                                                            key={friend.userId}
+                                                            name={friend.userName}
+                                                            status={formatTimeAgo(friend.sinceOrUpdatedAt)}
+                                                            hasActions={false}
+                                                            hasUnfriend={true}
+                                                            onUnfriend={() => handleUnfriend(friend.userName)}
+                                                        />
+                                                    ))
+                                                ) : (
+                                                    <Text textAlign="center" color="gray.500" py={4} fontSize="sm">
+                                                        No friends yet
+                                                    </Text>
+                                                )}
+                                            </Flex>
+                                        </Box>
+
+
+                                        <Box
+
+                                            borderRadius="xl"
+
+                                            bg="white"
+
+                                        >
+                                            <Text fontWeight="bold" fontSize="18px" mb={4}>
+                                                INCOMING REQUESTS ({friendsData.pendingInbound.length})
+                                            </Text>
+
+                                            <Flex direction="column" gap={3}>
+                                                {friendsData.pendingInbound.length > 0 ? (
+                                                    friendsData.pendingInbound.map((request) => (
+                                                        <FriendItem
+                                                            key={request.userId}
+                                                            name={request.userName}
+                                                            status={`Request ${formatTimeAgo(request.sinceOrUpdatedAt)}`}
+                                                            hasActions={true}
+                                                            onAccept={() => handleAcceptFriendRequest(request.userName)}
+                                                            onReject={() => handleRejectFriendRequest(request.userName)}
+                                                        />
+                                                    ))
+                                                ) : (
+                                                    <Text textAlign="center" color="gray.500" py={4} fontSize="sm">
+                                                        No incoming requests
+                                                    </Text>
+                                                )}
+                                            </Flex>
+                                        </Box>
+
+
+                                        <Box
+
+                                            borderRadius="xl"
+
+                                            bg="white"
+
+                                        >
+                                            <Text fontWeight="bold" fontSize="18px" mb={4}>
+                                                SENT REQUESTS ({friendsData.pendingOutbound.length})
+                                            </Text>
+
+                                            <Flex direction="column" gap={3}>
+                                                {friendsData.pendingOutbound.length > 0 ? (
+                                                    friendsData.pendingOutbound.map((request) => (
+                                                        <FriendItem
+                                                            key={request.userId}
+                                                            name={request.userName}
+                                                            status={`Sent ${formatTimeAgo(request.sinceOrUpdatedAt)}`}
+                                                            hasActions={false}
+                                                        />
+                                                    ))
+                                                ) : (
+                                                    <Text textAlign="center" color="gray.500" py={4} fontSize="sm">
+                                                        No sent requests
+                                                    </Text>
+                                                )}
+                                            </Flex>
+                                        </Box>
+
+
+                                        <Button
+                                            w="100%"
+                                            variant="outline"
+                                            borderRadius="full"
+                                            leftIcon={<FiUserPlus />}
+                                            colorScheme="red"
+                                            onClick={() => setIsAddFriendModalOpen(true)}
+                                        >
+                                            ADD FRIEND
+                                        </Button>
                                     </Flex>
 
-                                    <Flex justify="space-between" mb={4} pt={4} borderTop="1px solid #f0f0f0">
+                                    <Flex justify="space-between" mb={4} p={2} borderTop="1px solid #f0f0f0">
                                         <Box textAlign="center">
                                             <Text fontSize="24px" fontWeight="bold">{friendsData.pendingOutbound.length}</Text>
                                             <Text fontSize="11px" color="gray.500">FRIENDS REQUEST SENT</Text>
@@ -611,6 +714,7 @@ export default function ProfileUI() {
                                         borderRadius="full"
                                         leftIcon={<FiUserPlus />}
                                         colorScheme="red"
+                                        mb={2}
                                         onClick={() => setIsAddFriendModalOpen(true)}
                                     >
                                         ENTER USERNAME

@@ -294,46 +294,80 @@ const About = () => {
 
 
             <Box bg="gray.50" py={{ base: 16, md: 24 }} px={{ base: 6, md: 16 }}>
-                <VStack
-                    spacing={10}
-                    textAlign="start"
-                    justify="flex-start"
-                    align="start" // ensure everything aligns left
-                >
-                    {/* Custom Gradient Heading */}
+                <Container maxW="container.xl">
                     <div className="about-heading-3rd">
                         <h1 className="about-title">BOOKS &</h1>
                         <h1 className="about-gradient">MERCHS</h1>
                     </div>
 
-                    {/* Section Description */}
-                    <Text
-                        color="gray.600"
-                        maxW="3xl"
-                        fontSize={{ base: "md", md: "lg" }}
-                        lineHeight="tall"
-                    >
-                        Carefully curated learning material and exclusive merchandise for
-                        ThinkMoves members.
-                    </Text>
+                    <VStack spacing={12} textAlign="center" align="center" w="full" mt={8}>
+    <Flex justify="center" w="full" px={{ base: 0, md: 4 }}>
+        <Box
+            bg="white"
+            borderRadius={{ base: "none", md: "2xl" }}
+            boxShadow={{ base: "none", md: "xl" }}
+            p={{ base: 4, sm: 6, md: 12 }}
+            w="full"
+            maxW="4xl"
+            position="relative"
+            overflow="hidden"
+        >
+            {/* Decorative gradient overlay */}
+            <Box
+                position="absolute"
+                top="-50%"
+                right="-10%"
+                width="300px"
+                height="300px"
+                bg="red.500"
+                borderRadius="full"
+                filter="blur(100px)"
+                opacity="0.1"
+                zIndex="0"
+            />
 
-                    {/* Coming Soon Box */}
-                    <Box
-                        bg="white"
-                        borderRadius="2xl"
-                        boxShadow="md"
-                        p={12}
-                        textAlign="center"
-                        w={{ base: "full", md: "lg" }}
-                    >
-                        <Text fontSize="2xl" fontWeight="bold" color="gray.700">
-                            📚 Coming Soon!
-                        </Text>
-                        <Text color="gray.500" mt={2}>
-                            Our books and merchandise will be available soon. Stay tuned!
+            <VStack spacing={6} align="stretch" position="relative" zIndex="1">
+                <Flex align="start" gap={4}>
+                    <Box flex="1">
+                        <Heading 
+                            size={{ base: "md", md: "lg" }} 
+                            color="gray.800" 
+                            mb={2}
+                        >
+                            ThinkMoves Books & Scorebooks
+                        </Heading>
+                        <Text color="gray.600" fontSize="sm">
+                            Interest Form - Help us decide what to print first
                         </Text>
                     </Box>
-                </VStack>
+                </Flex>
+
+                <Box h="1px" bg="gray.200" />
+
+                <Box mx={{ base: -4, sm: -6, md: 0 }}>
+                    <Box
+                        as="iframe"
+                        src="https://forms.gle/aC6RX7K5szCqDZVw5 "
+                        width="100%"
+                        height={{ base: "600px", md: "800px" }}
+                        borderRadius={{ base: "none", md: "lg" }}
+                        border="none"
+                    />
+                </Box>
+
+                <Text
+                    color="gray.500"
+                    fontSize="sm"
+                    textAlign="center"
+                    fontStyle="italic"
+                >
+                    Thank you for helping shape the first batch of ThinkMoves books & merch! 🎉
+                </Text>
+            </VStack>
+        </Box>
+    </Flex>
+</VStack>
+                </Container>
             </Box>
 
         </>
