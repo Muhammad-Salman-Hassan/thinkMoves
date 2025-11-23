@@ -93,11 +93,11 @@ export default function HomeNew({ isEdit }) {
 
 
 
-        // 1. Reset chess engine
+
         const game = new Chess();
         game.reset();
 
-        // 2. Replay all moves
+
         movesOnly.forEach((m) => {
             try {
                 game.move(m);
@@ -153,7 +153,7 @@ export default function HomeNew({ isEdit }) {
                         }
                     );
 
-                    const { correctMoves, remainingMoves, metadata, gameImageUrls, notes, timeSaved, moveImageUrls } =
+                    const { correctMoves, remainingMoves, metadata, gameImageUrls, notes, timeSaved, moveImageUrls, gameId } =
                         response.data;
 
                     const parsedCorrectMoves = parseSafely(correctMoves);
@@ -208,6 +208,7 @@ export default function HomeNew({ isEdit }) {
                         notes: notes || "",
                         timeSaved: timeSaved || "",
                         movesByKey,
+                        gameId
                     });
 
                     setData({
@@ -217,7 +218,7 @@ export default function HomeNew({ isEdit }) {
                         gameImages: gameImageUrls || [],
                         croppedImages: response.data.moveImageUrls || []
                     });
-                   
+
                     setAnalyzedImages(moveImageUrls)
                     setPreviewUrls(gameImageUrls || []);
 
@@ -384,7 +385,7 @@ export default function HomeNew({ isEdit }) {
         fileInputRef.current.click();
     };
 
-    
+
     const analyzeGame = async () => {
         if (selectedFiles.length === 0) return;
 
@@ -902,7 +903,7 @@ export default function HomeNew({ isEdit }) {
                                                 border={"1px solid"}
                                                 borderColor={"linear-gradient(265.38deg, rgba(255, 255, 255, 0.6) 24.8%, rgba(255, 255, 255, 0.3) 85.32%)"}
                                             >
-                                                Save Game <Box bg={"black"} p={1} borderRadius={"full"} border={"1px solid white"}> <IoMdArrowRoundForward /></Box>
+                                                {isEdit ? "Update game" : "Save Game"}  <Box bg={"black"} p={1} borderRadius={"full"} border={"1px solid white"}> <IoMdArrowRoundForward /></Box>
                                             </Button>
                                         </HStack>
 
@@ -1166,6 +1167,7 @@ export default function HomeNew({ isEdit }) {
                 isOpen={isSaveModalOpen}
                 onClose={() => setIsSaveModalOpen(false)}
                 payload={{ ...formData, gameImageUrls: previewUrls, cropImageUrls: analyzedImages, sheetType: data?.metadata?.SheetType }}
+                isEdit={isEdit}
             />
             <SavePositionModal
                 isOpen={isPositionModalOpen}

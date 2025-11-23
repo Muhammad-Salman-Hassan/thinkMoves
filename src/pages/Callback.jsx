@@ -5,9 +5,9 @@ import { useNavigate } from "react-router-dom";
 export default function Callback() {
     const navigate = useNavigate();
     useEffect(() => {
-        console.log("Callback mounted ✅");
+      
         const code = new URLSearchParams(window.location.search).get("code");
-        console.log("Received code:", code);
+     
 
         
         setTimeout(() => navigate("/"), 2000);
@@ -63,7 +63,7 @@ export default function Callback() {
                 );
                 
 
-                console.log("POS",response)
+               
                
                 navigate("/");
             } catch (err) {

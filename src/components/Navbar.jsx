@@ -17,28 +17,37 @@ import { RiProfileFill } from "react-icons/ri";
 
 export default function Navbar() {
     const navigate = useNavigate();
-    const token = localStorage.getItem("access_token");
+    const token = localStorage.getItem("id_token");
     const { open, onOpen, onClose } = useDisclosure();
     const location = useLocation();
     const currentPath = location.pathname;
+
     const handleNavigate = () => {
-        // localStorage.clear();
-        // onClose();
         navigate("/profile");
+        onClose();
     };
+
     const handleLogout = () => {
         localStorage.clear();
         onClose();
-        navigate("/profile");
+        navigate("/");
     };
 
     const NavLinks = () => {
-        const links = [
+        // Base links always visible
+        const baseLinks = [
             { name: "Home", to: "/" },
-            // { name: "Analyse", to: "/analyze" },
-            { name: "Library", to: "/library" },
             { name: "About", to: "/about-us" },
         ];
+
+        // Protected links only visible when logged in
+        const protectedLinks = token ? [
+            { name: "Library", to: "/library" },
+            { name: "Profile", to: "/profile" },
+        ] : [];
+
+        // Combine links
+        const links = [...baseLinks, ...protectedLinks];
 
         return links.map(link => (
             <ChakraLink
@@ -56,7 +65,6 @@ export default function Navbar() {
         ));
     };
 
-
     return (
         <Box
             as="nav"
@@ -69,7 +77,6 @@ export default function Navbar() {
         >
             <Container maxW="container.xl" py={4}>
                 <Flex justify="space-between" align="center">
-
                     <Heading
                         size="4xl"
                         fontFamily="'Clash Display', sans-serif"
@@ -86,16 +93,16 @@ export default function Navbar() {
                             <NavLinks />
                         </HStack>
 
-                        {token ? (
-                            <IconButton
-                                onClick={handleNavigate}
-                                bg={"transparent"}
-                                color={"black"}
-                                gap="10px"
-                                fontSize={"25px"}
-                            >
-                                <RiProfileFill />
-                            </IconButton>
+                        {token ? (<></>
+                            // <IconButton
+                            //     onClick={handleNavigate}
+                            //     bg={"transparent"}
+                            //     color={"black"}
+                            //     gap="10px"
+                            //     fontSize={"25px"}
+                            // >
+                            //     <RiProfileFill />
+                            // </IconButton>
                         ) : (
                             <HStack spacing={4}>
                                 <Button
@@ -114,36 +121,21 @@ export default function Navbar() {
                                 >
                                     Login
                                 </Button>
-                                {/* <Button
-                                    as={Link}
-                                    to="/signup"
-                                    bg="#D32C32"
-                                    color="white"
-                                    _hover={{ bg: "#b92027" }}
-                                    borderRadius="14.82px"
-                                    px="16px"
-                                    py="10px"
-                                    rightIcon={<FaArrowRight size={24} />}
-                                    border="1.65px solid #D32C32"
-                                    gap="10px"
-                                    onClick={onClose}
-                                >
-                                    Signup
-                                </Button> */}
                             </HStack>
                         )}
                     </Flex>
 
                     <IconButton
                         aria-label="Open Menu"
-
                         display={{ base: "flex", md: "none" }}
                         onClick={onOpen}
                         bg="transparent"
                         color="#D32C32"
                         _hover={{ bg: "transparent", color: "#b92027" }}
                         fontSize="22px"
-                    ><FaBars /></IconButton>
+                    >
+                        <FaBars />
+                    </IconButton>
                 </Flex>
             </Container>
 

@@ -122,7 +122,7 @@ export default function ProfileUI() {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
-            console.log("FRIENDS", res.data);
+           
             setFriendsData(res.data);
 
         } catch (err) {
@@ -411,7 +411,7 @@ export default function ProfileUI() {
                     opacity="0.2"
                     zIndex="0"
                 />
-                <Box bg="#fef5f5" minH="100vh" py={8}>
+                <Box  minH="100vh" py={8}>
 
                     <Container maxW="container.xl" px={{ base: 4, md: 8 }}>
                         <Heading fontSize={{ base: "2xl", sm: "4xl", md: "5xl", lg: "5xl" }} fontFamily="'Clash Display', sans-serif" color="black" fontWeight="600" mb={8}> Profile & Friends </Heading>
