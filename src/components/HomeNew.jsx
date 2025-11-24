@@ -36,6 +36,7 @@ import ChessAnalysis from "./DeepAnalyse";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { LuSearch } from "react-icons/lu";
+import ShareGameModal from "./ShareGame";
 
 export default function HomeNew({ isEdit }) {
     const chessGameRef = useRef(new Chess());
@@ -68,6 +69,7 @@ export default function HomeNew({ isEdit }) {
     const [analyzedImages, setAnalyzedImages] = useState([]);
     const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
     const [isPositionModalOpen, setIsPositionModalOpen] = useState(false);
+    const [isShareGameModal, setIsShareGameModal] = useState(false);
     const [isImageModalOpen, setIsImageModalOpen] = useState(false);
     const [imageList, setImageList] = useState([]);
     const [data, setData] = useState({});
@@ -463,6 +465,9 @@ export default function HomeNew({ isEdit }) {
     };
     const handleOpenPositionModal = () => {
         setIsPositionModalOpen(true);
+    };
+    const handleOpenShareGameModal = () => {
+        setIsShareGameModal(true);
     };
 
     const lastfen = data?.lastValidFEN && data.lastValidFEN.trim() !== ""
@@ -860,7 +865,7 @@ export default function HomeNew({ isEdit }) {
 
 
                             <SimpleGrid columns={{ base: 1, md: 3, lg: 1 }} gap={4}>
-                                
+
                                 <Field.Root w={"100%"}>
                                     <Field.Label color="white">Suggested Moves</Field.Label>
                                     <Box bg="white" color="black" p={2} borderRadius="md" height="120px" overflowY="auto" w={"100%"}>
@@ -887,7 +892,7 @@ export default function HomeNew({ isEdit }) {
                                     </Box>
 
                                 </Field.Root>
-                                
+
 
 
 
@@ -1037,43 +1042,43 @@ export default function HomeNew({ isEdit }) {
                                         })}
                                 </SimpleGrid>
 
-                                
+
                             </Box>
 
 
                             <Box width="100%">
-                                    <SimpleGrid columns={{ base: 1, md: 2, lg: 1 }} gap={2} width="100%" mb={2}>
+                                <SimpleGrid columns={{ base: 1, md: 2, lg: 1 }} gap={2} width="100%" mb={2}>
 
-                                        <HStack spacing={4} width="100%">
-                                            <Button
-                                                bg="#D32C32"
-                                                color="white"
-                                                height="45px"
-                                                flex="1"
-                                                disabled={!token}
-                                                onClick={handleOpenPositionModal}
-                                                borderRadius={"14.82px"}
-                                                border={"1px solid"}
-                                                borderColor={"linear-gradient(265.38deg, rgba(255, 255, 255, 0.6) 24.8%, rgba(255, 255, 255, 0.3) 85.32%)"}
-                                            >
-                                                Save Position <Box bg={"black"} p={1} borderRadius={"full"} border={"1px solid white"}> <IoMdArrowRoundForward /></Box>
-                                            </Button>
-                                            <Button
-                                                bg="#D32C32"
-                                                color="white"
-                                                height="45px"
-                                                flex="1"
-                                                disabled={!token}
-                                                onClick={handleOpenSaveModal}
-                                                borderRadius={"14.82px"}
-                                                border={"1px solid"}
-                                                borderColor={"linear-gradient(265.38deg, rgba(255, 255, 255, 0.6) 24.8%, rgba(255, 255, 255, 0.3) 85.32%)"}
-                                            >
-                                                {isEdit ? "Update game" : "Save Game"}  <Box bg={"black"} p={1} borderRadius={"full"} border={"1px solid white"}> <IoMdArrowRoundForward /></Box>
-                                            </Button>
-                                        </HStack>
+                                    <HStack spacing={4} width="100%">
+                                        <Button
+                                            bg="#D32C32"
+                                            color="white"
+                                            height="45px"
+                                            flex="1"
+                                            disabled={!token}
+                                            onClick={handleOpenPositionModal}
+                                            borderRadius={"14.82px"}
+                                            border={"1px solid"}
+                                            borderColor={"linear-gradient(265.38deg, rgba(255, 255, 255, 0.6) 24.8%, rgba(255, 255, 255, 0.3) 85.32%)"}
+                                        >
+                                            Save Position <Box bg={"black"} p={1} borderRadius={"full"} border={"1px solid white"}> <IoMdArrowRoundForward /></Box>
+                                        </Button>
+                                        <Button
+                                            bg="#D32C32"
+                                            color="white"
+                                            height="45px"
+                                            flex="1"
+                                            disabled={!token}
+                                            onClick={handleOpenSaveModal}
+                                            borderRadius={"14.82px"}
+                                            border={"1px solid"}
+                                            borderColor={"linear-gradient(265.38deg, rgba(255, 255, 255, 0.6) 24.8%, rgba(255, 255, 255, 0.3) 85.32%)"}
+                                        >
+                                            {isEdit ? "Update game" : "Save Game"}  <Box bg={"black"} p={1} borderRadius={"full"} border={"1px solid white"}> <IoMdArrowRoundForward /></Box>
+                                        </Button>
+                                    </HStack>
 
-
+                                    {isEdit && (
                                         <HStack spacing={4} width="100%">
                                             <Button
                                                 bg="#D32C32"
@@ -1095,13 +1100,17 @@ export default function HomeNew({ isEdit }) {
                                                 borderRadius={"14.82px"}
                                                 border={"1px solid"}
                                                 borderColor={"linear-gradient(265.38deg, rgba(255, 255, 255, 0.6) 24.8%, rgba(255, 255, 255, 0.3) 85.32%)"}
+                                                onClick={handleOpenShareGameModal}
+
                                             >
                                                 Share Game <Box bg={"black"} p={1} borderRadius={"full"} border={"1px solid white"}> <IoMdArrowRoundForward /></Box>
                                             </Button>
                                         </HStack>
-                                    </SimpleGrid>
+                                    )}
 
-                                </Box>
+                                </SimpleGrid>
+
+                            </Box>
 
 
 
@@ -1164,6 +1173,12 @@ export default function HomeNew({ isEdit }) {
                 onClose={() => setIsPositionModalOpen(false)}
                 payload={{ fen: fen, whosTurn: whosturn }}
             />
+            <ShareGameModal
+                isOpen={isShareGameModal}
+                onClose={() => setIsShareGameModal(false)}
+                payload={{ gameId: formData.gameId }}
+            />
+
 
         </>
     );

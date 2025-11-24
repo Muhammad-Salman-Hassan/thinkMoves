@@ -10,10 +10,11 @@ import {
     Container,
     Avatar,
     AvatarGroup,
-    
     Heading,
+    Badge,
+    Spinner,
 } from "@chakra-ui/react";
-import { FiEdit2, FiX, FiCheck, FiUserPlus } from "react-icons/fi";
+import { FiEdit2, FiX, FiCheck, FiUserPlus, FiInbox, FiMail } from "react-icons/fi";
 
 import orb1 from "../assets/orb1.png";
 import gradient from "../assets/gradientbg.png";
@@ -39,7 +40,7 @@ function FriendItem({ name, status, hasActions, onAccept, onReject, hasUnfriend,
         >
             <Flex align="center" gap={3}>
                 <Avatar.Root size="sm">
-                    <Avatar.Fallback>{name.substring(0, 2).toUpperCase()}</Avatar.Fallback>
+                    <Avatar.Fallback>{name?.substring(0, 2).toUpperCase() ?? 'NA'}</Avatar.Fallback>
                 </Avatar.Root>
                 <Box>
                     <Text fontSize="14px" fontWeight="medium">{name}</Text>
@@ -75,7 +76,61 @@ function FriendItem({ name, status, hasActions, onAccept, onReject, hasUnfriend,
     );
 }
 
+function InboxItem({ item, onViewItem }) {
+    const formatDate = (epochMs) => {
+        if (!epochMs) return 'Unknown date';
+        const date = new Date(parseInt(epochMs));
+        return date.toLocaleDateString('en-US', { 
+            month: 'short', 
+            day: 'numeric', 
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    };
 
+    return (
+        <Flex
+            align="center"
+            justify="space-between"
+            p={3}
+            borderRadius="md"
+            bg="gray.50"
+            _hover={{ bg: "gray.100" }}
+            border={"1px solid #e4e4e7"}
+            cursor="pointer"
+            onClick={() => onViewItem?.(item)}
+        >
+            <Flex align="center" gap={3} flex={1}>
+                <Box 
+                    w="40px" 
+                    h="40px" 
+                    borderRadius="md" 
+                    bg="red.50" 
+                    display="flex" 
+                    alignItems="center" 
+                    justifyContent="center"
+                >
+                    <FiMail color="#DE252C" size={20} />
+                </Box>
+                <Box flex={1}>
+                    <Text fontSize="14px" fontWeight="medium" noOfLines={1}>
+                        {item?.itemType?.toUpperCase() ?? 'ITEM'} Shared
+                    </Text>
+                    <Text fontSize="12px" color="gray.600" noOfLines={1}>
+                        {item?.message || 'No message'}
+                    </Text>
+                    <Text fontSize="11px" color="gray.500" mt={1}>
+                        {formatDate(item?.createdAtEpochMs)}
+                    </Text>
+                </Box>
+            </Flex>
+            <Badge colorScheme="red" fontSize="10px">
+                {item?.itemType ?? 'item'}
+            </Badge>
+        </Flex>
+    );
+}
 
 export default function ProfileUI() {
     const [email, setEmail] = useState(null);
@@ -90,11 +145,18 @@ export default function ProfileUI() {
         pendingOutbound: []
     });
     const [isAddFriendModalOpen, setIsAddFriendModalOpen] = useState(false);
+    
+   
+    const [inboxData, setInboxData] = useState([]);
+    const [inboxLoading, setInboxLoading] = useState(false);
+    const [showInbox, setShowInbox] = useState(false);
+    
     const token = localStorage.getItem("id_token");
 
     useEffect(() => {
         fetchProfile();
         fetchFriendsOverview();
+        fetchInbox();
     }, []);
 
     const fetchProfile = async () => {
@@ -105,10 +167,9 @@ export default function ProfileUI() {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
-
-            setProfile(res.data);
-            setEmail(res.data.userName);
-            setEditValue(res.data.userName);
+            setProfile(res?.data);
+            setEmail(res?.data?.userName);
+            setEditValue(res?.data?.userName || '');
 
         } catch (err) {
             console.error("Error fetching profile:", err);
@@ -122,22 +183,56 @@ export default function ProfileUI() {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
-           
-            setFriendsData(res.data);
+            setFriendsData(res?.data || { friends: [], pendingInbound: [], pendingOutbound: [] });
 
         } catch (err) {
             console.error("Error fetching friends:", err);
-            if (err.status === 401) {
+            if (err?.status === 401 || err?.response?.status === 401) {
                 localStorage.clear();
                 window.location.href = "/login";
             }
         }
     };
 
+    const fetchInbox = async () => {
+        setInboxLoading(true);
+        try {
+            const res = await axios.post(
+                `${BASE_URL}/api/Shares/GetInbox`,
+                {},
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            if (res?.data?.success) {
+                setInboxData(res?.data?.items || []);
+            }
+
+        } catch (err) {
+            console.error("Error fetching inbox:", err);
+            if (err?.status === 401 || err?.response?.status === 401) {
+                localStorage.clear();
+                window.location.href = "/login";
+            }
+        } finally {
+            setInboxLoading(false);
+        }
+    };
+
+    const handleViewInboxItem = (item) => {
+        console.log("View item:", item);
+      
+        if (item?.itemType === 'game' && item?.itemID) {
+           
+            const gameId = item.itemID;
+            navigate(`/analyze/${encodeURIComponent(gameId)}`);
+         
+        }
+    };
+
     const handleSendFriendRequest = async (username) => {
         try {
             await axios.post(
-                `${BASE_URL}/api/Friends/SendFriendRequest?addFriendUserName=${username}&myUserName=${profile.userName}`,
+                `${BASE_URL}/api/Friends/SendFriendRequest?addFriendUserName=${username}&myUserName=${profile?.userName}`,
                 {},
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -155,11 +250,11 @@ export default function ProfileUI() {
             console.error("Error sending friend request:", error);
             toaster.create({
                 title: "Error",
-                description: error.response?.data || "Failed to send friend request",
+                description: error?.response?.data || "Failed to send friend request",
                 type: "error",
             });
 
-            if (error.status === 401) {
+            if (error?.status === 401 || error?.response?.status === 401) {
                 localStorage.clear();
                 window.location.href = "/login";
             }
@@ -187,7 +282,7 @@ export default function ProfileUI() {
             console.error("Error accepting friend request:", error);
             toaster.create({
                 title: "Error",
-                description: error.response?.data || "Failed to accept friend request",
+                description: error?.response?.data || "Failed to accept friend request",
                 type: "error",
             });
         }
@@ -213,11 +308,12 @@ export default function ProfileUI() {
             console.error("Error rejecting friend request:", error);
             toaster.create({
                 title: "Error",
-                description: error.response?.data || "Failed to reject friend request",
+                description: error?.response?.data || "Failed to reject friend request",
                 type: "error",
             });
         }
     };
+
     const handleUnfriend = async (userId) => {
         try {
             await axios.post(
@@ -228,17 +324,17 @@ export default function ProfileUI() {
 
             toaster.create({
                 title: "Unfriend Successfully",
-                description: "Friend request has been rejected",
+                description: "Friend has been removed",
                 type: "info",
             });
 
             fetchFriendsOverview();
 
         } catch (error) {
-            console.error("Error rejecting friend request:", error);
+            console.error("Error unfriending:", error);
             toaster.create({
                 title: "Error",
-                description: error.response?.data || "Failed to reject friend request",
+                description: error?.response?.data || "Failed to unfriend",
                 type: "error",
             });
         }
@@ -264,7 +360,7 @@ export default function ProfileUI() {
                 }
             );
 
-            if (response.status === 200) {
+            if (response?.status === 200) {
                 toaster.create({
                     title: "Username updated",
                     description: "Your username has been successfully changed.",
@@ -280,26 +376,23 @@ export default function ProfileUI() {
 
             let errorMessage = "Failed to update username";
 
-            if (error.response?.data) {
+            if (error?.response?.data) {
                 const errorData = error.response.data;
-
 
                 if (typeof errorData === 'string') {
                     errorMessage = errorData;
-                } else if (errorData.setUserNameresponse) {
+                } else if (errorData?.setUserNameresponse) {
                     errorMessage = errorData.setUserNameresponse;
-                } else if (errorData.errors && errorData.errors.length > 0) {
+                } else if (errorData?.errors && errorData.errors.length > 0) {
                     errorMessage = errorData.errors.join(', ');
-                } else if (errorData.message) {
+                } else if (errorData?.message) {
                     errorMessage = errorData.message;
                 }
             }
 
-
             errorMessage = String(errorMessage);
 
-
-            if (error.response?.status === 409) {
+            if (error?.response?.status === 409) {
                 toaster.create({
                     title: "Username Not Available",
                     description: errorMessage,
@@ -308,8 +401,7 @@ export default function ProfileUI() {
                 return;
             }
 
-
-            if (error.response?.status === 401) {
+            if (error?.response?.status === 401) {
                 localStorage.clear();
                 window.location.href = "/login";
                 return;
@@ -325,7 +417,9 @@ export default function ProfileUI() {
             setLoading(false);
         }
     };
+
     const formatTimeAgo = (timestamp) => {
+        if (!timestamp) return 'Unknown time';
         const now = new Date();
         const past = new Date(timestamp);
         const diffInSeconds = Math.floor((now - past) / 1000);
@@ -386,7 +480,6 @@ export default function ProfileUI() {
                 </Container>
             </Box>
             <Box position="relative" overflow="hidden" fontFamily="'Clash Display', sans-serif">
-
                 <Box
                     position="absolute"
                     top="17%"
@@ -411,14 +504,51 @@ export default function ProfileUI() {
                     opacity="0.2"
                     zIndex="0"
                 />
-                <Box  minH="100vh" py={8}>
-
+                <Box minH="100vh" py={8}>
                     <Container maxW="container.xl" px={{ base: 4, md: 8 }}>
-                        <Heading fontSize={{ base: "2xl", sm: "4xl", md: "5xl", lg: "5xl" }} fontFamily="'Clash Display', sans-serif" color="black" fontWeight="600" mb={8}> Profile & Friends </Heading>
+                        <Flex align="center" justify="space-between" mb={8}>
+                            <Heading fontSize={{ base: "2xl", sm: "4xl", md: "5xl", lg: "5xl" }} fontFamily="'Clash Display', sans-serif" color="black" fontWeight="600">
+                                Profile & Friends
+                            </Heading>
+                            
+                            
+                            <Button
+                                size="lg"
+                                variant="outline"
+                                borderRadius="full"
+                                leftIcon={<FiInbox />}
+                                colorScheme="red"
+                                onClick={() => setShowInbox(!showInbox)}
+                                position="relative"
+                            >
+                                Inbox
+                                {inboxData?.length > 0 && (
+                                    <Badge
+                                        position="absolute"
+                                        top="-8px"
+                                        right="-8px"
+                                        borderRadius="full"
+                                        bg="#DE252C"
+                                        color="white"
+                                        fontSize="10px"
+                                        minW="20px"
+                                        h="20px"
+                                        display="flex"
+                                        alignItems="center"
+                                        justifyContent="center"
+                                    >
+                                        {inboxData.length}
+                                    </Badge>
+                                )}
+                            </Button>
+                        </Flex>
+
+                       
+                        
 
                         <Flex gap={6} wrap={{ base: "wrap", lg: "nowrap" }} align="flex-start">
                             <Flex direction="column" gap={6} w={{ base: "100%", lg: "320px" }} flexShrink={0}>
-
+                                
                                 <Box
                                     p={6}
                                     borderRadius="3xl"
@@ -430,7 +560,6 @@ export default function ProfileUI() {
                                     position="relative"
                                 >
                                     <Flex direction="column" gap={4}>
-
                                         <Flex align="center" justify="space-between">
                                             <Flex align="center" gap={3}>
                                                 <AvatarGroup>
@@ -454,7 +583,6 @@ export default function ProfileUI() {
                                                 </Box>
                                             </Flex>
 
-
                                             <IconButton
                                                 size="sm"
                                                 variant="ghost"
@@ -466,7 +594,6 @@ export default function ProfileUI() {
                                                 <FiEdit2 size={16} />
                                             </IconButton>
                                         </Flex>
-
 
                                         {isEditing && (
                                             <Box w="100%" pl="76px">
@@ -505,9 +632,7 @@ export default function ProfileUI() {
                                             </Box>
                                         )}
 
-
                                         <Box w="100%" h="1px" bg="gray.100" />
-
 
                                         <Box w="100%">
                                             <Flex align="center" justify="space-between" py={3}>
@@ -531,7 +656,6 @@ export default function ProfileUI() {
                                         <Flex alignItems={"center"} justifyContent={"space-between"}>
                                             <Button
                                                 w="80%"
-
                                                 onClick={handleLogout}
                                                 borderRadius="full"
                                                 size="lg"
@@ -547,10 +671,7 @@ export default function ProfileUI() {
                                                 LOGOUT
                                             </Button>
 
-
-
                                             <IconButton
-
                                                 size="md"
                                                 borderRadius="full"
                                                 bg="#DE252C"
@@ -568,29 +689,18 @@ export default function ProfileUI() {
                                     </Flex>
                                 </Box>
 
-
+                               
                                 <Box
-                                  
                                     borderRadius="xl"
                                     boxShadow="sm"
                                     bg="white"
                                     border="1px solid #f0f0f0"
                                 >
-
-
                                     <Flex direction="column" gap={6} w={{ base: "100%", lg: "320px" }} flexShrink={0} p={2}>
-
-
-                                        <Box
-
-                                            borderRadius="xl"
-
-                                            bg="white"
-
-                                        >
+                                        <Box borderRadius="xl" bg="white">
                                             <Flex align="center" justify="space-between" mb={4}>
                                                 <Text fontWeight="bold" fontSize="18px">
-                                                    FRIENDS ({friendsData.friends.length})
+                                                    FRIENDS ({friendsData?.friends?.length || 0})
                                                 </Text>
                                                 <Button
                                                     size="sm"
@@ -603,15 +713,15 @@ export default function ProfileUI() {
                                             </Flex>
 
                                             <Flex direction="column" gap={3}>
-                                                {friendsData.friends.length > 0 ? (
+                                                {friendsData?.friends?.length > 0 ? (
                                                     friendsData.friends.map((friend) => (
                                                         <FriendItem
-                                                            key={friend.userId}
-                                                            name={friend.userName}
-                                                            status={formatTimeAgo(friend.sinceOrUpdatedAt)}
+                                                            key={friend?.userId}
+                                                            name={friend?.userName}
+                                                            status={formatTimeAgo(friend?.sinceOrUpdatedAt)}
                                                             hasActions={false}
                                                             hasUnfriend={true}
-                                                            onUnfriend={() => handleUnfriend(friend.userName)}
+                                                            onUnfriend={() => handleUnfriend(friend?.userName)}
                                                         />
                                                     ))
                                                 ) : (
@@ -622,28 +732,21 @@ export default function ProfileUI() {
                                             </Flex>
                                         </Box>
 
-
-                                        <Box
-
-                                            borderRadius="xl"
-
-                                            bg="white"
-
-                                        >
+                                        <Box borderRadius="xl" bg="white">
                                             <Text fontWeight="bold" fontSize="18px" mb={4}>
-                                                INCOMING REQUESTS ({friendsData.pendingInbound.length})
+                                                INCOMING REQUESTS ({friendsData?.pendingInbound?.length || 0})
                                             </Text>
 
                                             <Flex direction="column" gap={3}>
-                                                {friendsData.pendingInbound.length > 0 ? (
+                                                {friendsData?.pendingInbound?.length > 0 ? (
                                                     friendsData.pendingInbound.map((request) => (
                                                         <FriendItem
-                                                            key={request.userId}
-                                                            name={request.userName}
-                                                            status={`Request ${formatTimeAgo(request.sinceOrUpdatedAt)}`}
+                                                            key={request?.userId}
+                                                            name={request?.userName}
+                                                            status={`Request ${formatTimeAgo(request?.sinceOrUpdatedAt)}`}
                                                             hasActions={true}
-                                                            onAccept={() => handleAcceptFriendRequest(request.userName)}
-                                                            onReject={() => handleRejectFriendRequest(request.userName)}
+                                                            onAccept={() => handleAcceptFriendRequest(request?.userName)}
+                                                            onReject={() => handleRejectFriendRequest(request?.userName)}
                                                         />
                                                     ))
                                                 ) : (
@@ -654,25 +757,18 @@ export default function ProfileUI() {
                                             </Flex>
                                         </Box>
 
-
-                                        <Box
-
-                                            borderRadius="xl"
-
-                                            bg="white"
-
-                                        >
+                                        <Box borderRadius="xl" bg="white">
                                             <Text fontWeight="bold" fontSize="18px" mb={4}>
-                                                SENT REQUESTS ({friendsData.pendingOutbound.length})
+                                                SENT REQUESTS ({friendsData?.pendingOutbound?.length || 0})
                                             </Text>
 
                                             <Flex direction="column" gap={3}>
-                                                {friendsData.pendingOutbound.length > 0 ? (
+                                                {friendsData?.pendingOutbound?.length > 0 ? (
                                                     friendsData.pendingOutbound.map((request) => (
                                                         <FriendItem
-                                                            key={request.userId}
-                                                            name={request.userName}
-                                                            status={`Sent ${formatTimeAgo(request.sinceOrUpdatedAt)}`}
+                                                            key={request?.userId}
+                                                            name={request?.userName}
+                                                            status={`Sent ${formatTimeAgo(request?.sinceOrUpdatedAt)}`}
                                                             hasActions={false}
                                                         />
                                                     ))
@@ -683,27 +779,15 @@ export default function ProfileUI() {
                                                 )}
                                             </Flex>
                                         </Box>
-
-
-                                        {/* <Button
-                                            w="100%"
-                                            variant="outline"
-                                            borderRadius="full"
-                                            leftIcon={<FiUserPlus />}
-                                            colorScheme="red"
-                                            onClick={() => setIsAddFriendModalOpen(true)}
-                                        >
-                                            ADD FRIEND
-                                        </Button> */}
                                     </Flex>
 
                                     <Flex justify="space-between" mb={4} p={2} borderTop="1px solid #f0f0f0">
                                         <Box textAlign="center">
-                                            <Text fontSize="24px" fontWeight="bold">{friendsData.pendingOutbound.length}</Text>
+                                            <Text fontSize="24px" fontWeight="bold">{friendsData?.pendingOutbound?.length || 0}</Text>
                                             <Text fontSize="11px" color="gray.500">FRIENDS REQUEST SENT</Text>
                                         </Box>
                                         <Box textAlign="center">
-                                            <Text fontSize="24px" fontWeight="bold">{friendsData.pendingInbound.length}</Text>
+                                            <Text fontSize="24px" fontWeight="bold">{friendsData?.pendingInbound?.length || 0}</Text>
                                             <Text fontSize="11px" color="gray.500">FRIENDS INCOMING REQUEST</Text>
                                         </Box>
                                     </Flex>
@@ -722,7 +806,7 @@ export default function ProfileUI() {
                                 </Box>
                             </Flex>
 
-                            {/* RIGHT SIDE CONTENT */}
+                            
                             <Flex direction="column" flex={1} gap={6} w="100%">
                                 <Box
                                     p={6}
@@ -736,7 +820,6 @@ export default function ProfileUI() {
                                     height="100%"
                                 >
                                     <Flex align="center" gap={2} mb={4}>
-                                       
                                         <Text fontWeight="bold" fontSize="18px">
                                             GAMEPLAY INSIGHTS
                                         </Text>
@@ -758,7 +841,6 @@ export default function ProfileUI() {
                                     flexDirection="column"
                                 >
                                     <Flex align="center" gap={2} mb={4}>
-                                       
                                         <Text fontWeight="bold" fontSize="18px">
                                             ADVANCED STATS
                                         </Text>
@@ -768,12 +850,57 @@ export default function ProfileUI() {
                                         <Text>Coming Soon</Text>
                                     </Flex>
                                 </Box>
+                                {showInbox && (
+                            <Box
+                                mb={6}
+                                p={6}
+                                borderRadius="xl"
+                                boxShadow="sm"
+                                bg="white"
+                                border="1px solid #f0f0f0"
+                            >
+                                <Flex align="center" justify="space-between" mb={4}>
+                                    <Text fontWeight="bold" fontSize="18px">
+                                        INBOX ({inboxData?.length || 0})
+                                    </Text>
+                                    <IconButton
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => setShowInbox(false)}
+                                    >
+                                        <FiX />
+                                    </IconButton>
+                                </Flex>
+
+                                {inboxLoading ? (
+                                    <Flex justify="center" py={8}>
+                                        <Spinner size="lg" color="#DE252C" />
+                                    </Flex>
+                                ) : inboxData?.length > 0 ? (
+                                    <Flex direction="column" gap={3} maxH="400px" overflowY="auto">
+                                        {inboxData.map((item, index) => (
+                                            <InboxItem
+                                                key={item?.itemID || index}
+                                                item={item}
+                                                onViewItem={handleViewInboxItem}
+                                            />
+                                        ))}
+                                    </Flex>
+                                ) : (
+                                    <Flex direction="column" align="center" justify="center" py={8}>
+                                        <FiInbox size={48} color="#ccc" />
+                                        <Text textAlign="center" color="gray.500" mt={4} fontSize="sm">
+                                            No items in your inbox
+                                        </Text>
+                                    </Flex>
+                                )}
+                            </Box>
+                        )}
                             </Flex>
                         </Flex>
                     </Container>
                 </Box>
             </Box>
-
 
             <AddFriendModal
                 isOpen={isAddFriendModalOpen}
