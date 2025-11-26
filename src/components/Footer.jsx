@@ -133,11 +133,11 @@ export default function Footer() {
 
                     {/* 🔗 Middle Section - Links */}
                     <Flex
-                        justify="space-between"
+
                         flex="1"
                         maxW="700px"
                         wrap="wrap"
-                        gap={10}
+                        gap={20}
                     >
                         <VStack align="flex-start" spacing={3}>
                             <Heading size="sm" fontWeight="600" mb={2}>
@@ -169,8 +169,8 @@ export default function Footer() {
                             </Link>
                             <Text>
                                 Houston
-                                <br />
-                                TX 
+
+                                TX
                             </Text>
                         </VStack>
                     </Flex>
@@ -196,8 +196,8 @@ export default function Footer() {
                 >
                     <Text>© 2025 All Rights Reserved</Text>
                     <HStack spacing={6}>
-                        <Link href="#">Privacy policy</Link>
-                        <Link href="#">Terms & conditions</Link>
+                        <Link href="#" color={"white"}>Privacy policy</Link>
+                        <Link href="#" color={"white"}>Terms & conditions</Link>
                         <Flex align="center" gap={2} cursor="pointer" onClick={scrollToTop}>
                             <Text>Back to top</Text>
                             <IconButton

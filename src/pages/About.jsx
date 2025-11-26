@@ -386,7 +386,7 @@ const About = () => {
             </Box>
 
             <Box py={20}>
-                <Container maxW="6xl">
+                <Container >
                     {/* ---------------------- SECTION 1: HOW IT WORKS ---------------------- */}
                     <VStack spacing={12} align="stretch">
                         <Box textAlign="start">

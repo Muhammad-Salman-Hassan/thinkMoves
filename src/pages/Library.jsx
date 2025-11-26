@@ -409,7 +409,42 @@ const Library = () => {
                     </Heading>
                 </Container>
             </Box>
-
+<Box
+                    position="absolute"
+                    top="40%"
+                    left="15%"
+                    width="300px"
+                    height="300px"
+                    bg="red"
+                    borderRadius="full"
+                    filter="blur(100px)"
+                    opacity="0.3"
+                    zIndex="0"
+                />
+                <Box
+                    position="absolute"
+                    top="40%"
+                    right="15%"
+                    width="350px"
+                    height="350px"
+                    bg="red"
+                    borderRadius="full"
+                    filter="blur(110px)"
+                    opacity="0.2"
+                    zIndex="0"
+                />
+                <Box
+                    position="absolute"
+                    top="45%"
+                    right="40%"
+                    width="350px"
+                    height="350px"
+                    bg="red"
+                    borderRadius="full"
+                    filter="blur(110px)"
+                    opacity="0.2"
+                    zIndex="0"
+                />
             <Container maxW="container.xl" px={{ base: 4, md: 8 }} py={8}>
                 <VStack align={"start"} mb={8}> <Heading fontSize={{ base: "2xl", sm: "4xl", md: "5xl", lg: "5xl" }} fontFamily="'Clash Display', sans-serif" color="black" fontWeight="600" > Library </Heading> <Text>All your analyzed games and </Text> <Text>saved positions — organized and easy to explore.</Text> </VStack>
 

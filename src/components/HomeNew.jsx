@@ -732,20 +732,20 @@ const moveToEnd = () => {
                         direction={flexDirection}
                         align="flex-start"
                         justify="center"
-                        gap={{ base: 8, md: 10, lg: 16 }}
+                        gap={{ base: 8, md: 10, lg: 24 }}
                         mt={{ base: 6, md: 10 }}
                         mb={12}
                         flexWrap="wrap"
 
                     >
 
-                        <VStack spacing={6} w={{ base: "100%", lg: "35%" }} align="center">
+                        <VStack spacing={6} w={{ base: "100%", lg: "40%" }} align="center">
                             <Box
                                 boxShadow="2xl"
                                 borderRadius="2xl"
                                 overflow="hidden"
                                 bg="black"
-                                w={{ base: "90%", md: "400px", lg: "470px" }}
+                                w={{ base: "90%", md: "400px", lg: "600px" }}
                                 maxW="100%"
                             >
                                 <ChessGame
@@ -1311,7 +1311,7 @@ const moveToEnd = () => {
                             </Text>
                             <Box
                                 display="grid"
-                                gridTemplateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}
+                                gridTemplateColumns={{ base: "1fr", md: "repeat(4, 1fr)" }}
                                 gap={6}
                             >
                                 {[
