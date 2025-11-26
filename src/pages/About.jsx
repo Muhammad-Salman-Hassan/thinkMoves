@@ -9,10 +9,13 @@ import board from "../assets/chessBoard.jpg";
 
 import whitegradient from "../assets/whitebg.png";
 import whitegradient1 from "../assets/whitebg1.png";
-import { Box, Button, Container, Flex, Heading, Image, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, Container, Flex, Heading, Icon, Image, Link, SimpleGrid, Text, VStack } from '@chakra-ui/react'
 import './About.css' // import CSS file
+import { FiArrowRight, FiBarChart2, FiCamera, FiCpu } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
 
 const About = () => {
+    const navigate = useNavigate()
     return (
         <>
             <Box position="relative" bg="#000" color="white" overflow="hidden" w="100%" mb={8}>
@@ -382,6 +385,158 @@ const About = () => {
                 </Container>
             </Box>
 
+            <Box py={20}>
+                <Container maxW="6xl">
+                    {/* ---------------------- SECTION 1: HOW IT WORKS ---------------------- */}
+                    <VStack spacing={12} align="stretch">
+                        <Box textAlign="start">
+
+                            <Heading size="5xl" fontWeight="700" color={"#D32C32"}>
+                                How ThinkMoves Works
+                            </Heading>
+                        </Box>
+
+                        <SimpleGrid columns={{ base: 1, md: 3 }} gap={8} my={4}>
+                            {/* Step 1 */}
+                            <Box
+                                p={8}
+                                borderRadius="xl"
+                                bg={"gray.50"}
+                                border="1px solid"
+                                borderColor={"#18181b1a"}
+                                _hover={{ shadow: "lg", transform: "translateY(-3px)" }}
+                                transition="0.2s"
+                                boxShadow={"0px 16px 24px #18181b1a"}
+                            >
+                                <VStack align="start" spacing={4}>
+                                    <Icon as={FiCamera} boxSize={10} color="#D32C32" />
+                                    <Heading size="md">1. Scan your scoresheet</Heading>
+                                    <Text fontSize="md" color="gray.600">
+                                        After your game, take a clear photo of your scoresheet and
+                                        upload it to the ThinkMoves website.
+                                    </Text>
+                                </VStack>
+                            </Box>
+
+                            {/* Step 2 */}
+                            <Box
+                                p={8}
+                                borderRadius="xl"
+                                bg={"gray.50"}
+                                border="1px solid"
+                                borderColor={"#18181b1a"}
+                                _hover={{ shadow: "lg", transform: "translateY(-3px)" }}
+                                transition="0.2s"
+                                boxShadow={"0px 16px 24px #18181b1a"}
+                            >
+                                <VStack align="start" spacing={4}>
+                                    <Icon as={FiCpu} boxSize={10} color="#D32C32" />
+                                    <Heading size="md">2. Digitize your game</Heading>
+                                    <Text fontSize="md" color="gray.600">
+                                        Our AI reads the handwritten moves from your scoresheet and
+                                        rebuilds the full game on a digital board so you can save,
+                                        share, and revisit anytime.
+                                    </Text>
+                                </VStack>
+                            </Box>
+
+                            {/* Step 3 */}
+                            <Box
+                                p={8}
+                                borderRadius="xl"
+                                bg={"gray.50"}
+                                border="1px solid"
+                                borderColor={"#18181b1a"}
+                                _hover={{ shadow: "lg", transform: "translateY(-3px)" }}
+                                transition="0.2s"
+                                boxShadow={"0px 16px 24px #18181b1a"}
+                            >
+                                <VStack align="start" spacing={4}>
+                                    <Icon as={FiBarChart2} boxSize={10} color="#D32C32" />
+                                    <Heading size="md">3. Study with Deep Analyze</Heading>
+                                    <Text fontSize="md" color="gray.600">
+                                        Fix any wrong moves, then run Deep Analyze with Stockfish 17.1
+                                        (up to depth 15) to uncover mistakes, blunders, and stronger
+                                        ideas. More analysis depth coming soon.
+                                    </Text>
+                                </VStack>
+                            </Box>
+                        </SimpleGrid>
+
+
+                        <Box >
+                            <Heading size="4xl" mb={4}>
+                                Why I Started ThinkMoves
+                            </Heading>
+
+                            <Text fontSize="md" color="gray.700" lineHeight="1.8">
+                                My name is{" "}
+                                <Link
+                                    href="https://ashaykargaonkar.com/"
+                                    color="#D32C32"
+                                    isExternal
+                                    fontWeight="600"
+                                >
+                                    Ashay Kargaonkar
+                                </Link>
+                                , and I’m the founder of ThinkMoves. I started playing
+                                over-the-board tournaments about two years ago and quickly
+                                realized that all my games were stuck on paper. After every event,
+                                I would manually enter moves into chess.com and try to analyze
+                                alone — slow, boring, and honestly still confusing.
+                                <br />
+                                <br />
+                                Over time, I ended up with a stack of unread scoresheets.
+                                ThinkMoves is the tool I wanted back then: scan the sheet once,
+                                turn it into a clean digital game, run analysis, and actually
+                                learn from every move. I built it for myself first — and now I
+                                hope it helps many other chess players too.
+                            </Text>
+                        </Box>
+
+                        <Box >
+                            <Heading size="4xl" mb={4}>
+                                What’s Next for ThinkMoves
+                            </Heading>
+
+                            <VStack align="start" spacing={4}>
+                                <Text color="gray.700" fontSize="md" lineHeight="1.8">
+                                    ThinkMoves is just getting started. Over the next months, I’m
+                                    planning to:
+                                </Text>
+
+                                <Text color="gray.700" fontSize="md">
+                                    • Support more scoresheets and languages
+                                </Text>
+
+                                <Text color="gray.700" fontSize="md">
+                                    • Go deeper with analysis — higher Stockfish depth, richer stats, and clearer summaries
+                                </Text>
+
+                                <Text color="gray.700" fontSize="md">
+                                    • Offer scorebooks and printable sheets
+                                </Text>
+
+                                <Text color="gray.700" fontSize="md">
+                                    • Add a coach-like chatbot for simple explanations
+                                </Text>
+
+                                <Box mt={4}>
+                                    <Button
+                                        colorScheme="red"
+                                        size="md"
+                                        rightIcon={<FiArrowRight />}
+                                        borderRadius="xl"
+                                        onClick={() => navigate("/feedback")}
+                                    >
+                                        Share Feedback
+                                    </Button>
+                                </Box>
+                            </VStack>
+                        </Box>
+                    </VStack>
+                </Container>
+            </Box>
         </>
     )
 }

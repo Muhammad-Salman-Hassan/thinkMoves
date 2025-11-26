@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { toaster } from "./Toaster";
-import { 
-    Button, 
-    Dialog, 
-    HStack, 
-    Input, 
-    Portal, 
-    Text, 
-    VStack, 
+import {
+    Button,
+    Dialog,
+    HStack,
+    Input,
+    Portal,
+    Text,
+    VStack,
     Box,
     Flex,
     Avatar,
@@ -19,7 +19,7 @@ import { FiCheck } from "react-icons/fi";
 import axios from "axios";
 import { BASE_URL } from "../utils/service";
 
-function ShareGameModal({ isOpen, onClose, payload }) {
+function ShareGameModal({ isOpen, onClose, payload, type = "game" }) {
     const [username, setUsername] = useState("");
     const [message, setMessage] = useState("");
     const [searchLoading, setSearchLoading] = useState(false);
@@ -66,30 +66,30 @@ function ShareGameModal({ isOpen, onClose, payload }) {
         try {
             const token = localStorage.getItem("id_token");
             const response = await axios.post(
-                `${BASE_URL}/api/Friends/FindUser`,{},
+                `${BASE_URL}/api/Friends/FindUser`, {},
                 {
                     params: { searchUserName: searchTerm },
                     headers: { Authorization: `Bearer ${token}` }
                 }
             );
 
-        
-            const results = response.data && response.data.playerID 
-                ? [response.data] 
+
+            const results = response.data && response.data.playerID
+                ? [response.data]
                 : [];
-            
+
             setSearchResults(results);
             setSearchLoading(false);
         } catch (error) {
             console.error("Error searching users:", error);
             setSearchResults([]);
             setSearchLoading(false);
-            
+
             if (error.response?.status === 404) {
                 // User not found - not an error, just no results
                 return;
             }
-            
+
             if (error.response?.status === 401) {
                 localStorage.clear();
                 window.location.href = "/login";
@@ -129,7 +129,7 @@ function ShareGameModal({ isOpen, onClose, payload }) {
 
         try {
             const token = localStorage.getItem("id_token");
-            
+
             const sharePayload = {
                 recipientUsername: selectedUser.userName,
                 itemID: payload.gameId,
@@ -163,9 +163,9 @@ function ShareGameModal({ isOpen, onClose, payload }) {
             }
         } catch (error) {
             console.error("Error sharing game:", error);
-            
+
             let errorMessage = "Failed to share game";
-            
+
             if (error.response?.data) {
                 const errorData = error.response.data;
                 if (typeof errorData === 'string') {
@@ -226,7 +226,7 @@ function ShareGameModal({ isOpen, onClose, payload }) {
 
                         <Dialog.Header>
                             <Dialog.Title fontSize="xl" fontWeight="bold">
-                                Share Game
+                                Share {type === "game" ? "Game" : "Position"}
                             </Dialog.Title>
                         </Dialog.Header>
 
@@ -235,7 +235,7 @@ function ShareGameModal({ isOpen, onClose, payload }) {
                                 <Text fontSize="sm" color="gray.600">
                                     Search for a user by their username:
                                 </Text>
-                                
+
                                 <Box position="relative">
                                     <Input
                                         placeholder="Enter username..."
@@ -257,8 +257,8 @@ function ShareGameModal({ isOpen, onClose, payload }) {
 
                                 {/* Search Results */}
                                 {searchResults.length > 0 && (
-                                    <VStack 
-                                        align="stretch" 
+                                    <VStack
+                                        align="stretch"
                                         spacing={2}
                                         maxH="200px"
                                         overflowY="auto"
@@ -310,9 +310,9 @@ function ShareGameModal({ isOpen, onClose, payload }) {
 
                                 {/* No Results Message */}
                                 {!searchLoading && username.trim().length > 0 && searchResults.length === 0 && (
-                                    <Box 
-                                        p={4} 
-                                        textAlign="center" 
+                                    <Box
+                                        p={4}
+                                        textAlign="center"
                                         color="gray.500"
                                         bg="gray.50"
                                         borderRadius="md"
@@ -321,7 +321,7 @@ function ShareGameModal({ isOpen, onClose, payload }) {
                                     </Box>
                                 )}
 
-                               
+
 
                                 {/* Message Input */}
                                 <Box>

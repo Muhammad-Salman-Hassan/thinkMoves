@@ -6,14 +6,19 @@ import {
   Button,
   VStack,
   Text,
+  HStack,
+  Link,
+  Icon,
   Field,
   InputGroup,
-  Icon,
 } from "@chakra-ui/react";
-import { useNavigate } from "react-router-dom";
-import { RiLockUnlockFill, RiMailAiFill } from "react-icons/ri";
 
-import "./Login.css"; // import CSS
+import { useNavigate } from "react-router-dom";
+import { RiLockUnlockFill, RiMailFill } from "react-icons/ri";
+import { FaGoogle, FaFacebook } from "react-icons/fa";
+import { MdArrowForward } from "react-icons/md";
+
+import "./Login.css";
 import orb1 from "../assets/orb1.png";
 import queen1 from "../assets/queen1.png";
 import queen2 from "../assets/queen2.png";
@@ -44,7 +49,7 @@ export default function Login() {
 
   return (
     <Flex minH="100vh" direction={{ base: "column", md: "row" }} bg="white">
-      {/* LEFT SIDE (HTML + CSS) */}
+      {/* LEFT SIDE */}
       <div className="left-section">
         <img src={gradient1} className="bg-gradient" alt="gradient" />
         <img src={whitegradient} className="bg-whitegradient" alt="whitegradient" />
@@ -60,47 +65,123 @@ export default function Login() {
         </div>
       </div>
 
-      {/* RIGHT SIDE (Chakra UI) */}
+      {/* RIGHT SIDE - Chakra UI v3 */}
       <Flex flex="1" align="center" justify="center" py={{ base: 8, md: 0 }} px={{ base: 4, md: 0 }}>
-        <Box w={{ base: "100%", sm: "xs", md: "sm", lg: "md" }} p={{ base: 6, md: 8 }} borderRadius="lg">
-          <Heading
-            textAlign={{ base: "center", md: "center" }}
-            mb={6}
-            color="black"
-            textTransform="uppercase"
-            fontSize={{ base: "2xl", md: "3xl", lg: "4xl" }}
-            fontFamily="'Clash Display', sans-serif"
-          >
-            Welcome Back
-          </Heading>
+        <Box w={{ base: "100%", sm: "380px" }} maxW="400px">
+          <VStack gap={6} align="stretch">
+            {/* Title */}
+            <Heading
+              textAlign="left"
+              color="black"
+              textTransform="uppercase"
+              fontSize={{ base: "3xl", md: "4xl" }}
+              fontWeight="bold"
+              letterSpacing="tight"
+              fontFamily="'Clash Display', sans-serif"
+            >
+              Welcome Back
+            </Heading>
 
-          <VStack spacing={5} align="stretch">
+            {/* Email Field */}
             <Field.Root required>
               <Field.Label>Email <Field.RequiredIndicator /></Field.Label>
-              <InputGroup startElement={<Icon as={RiMailAiFill} color="gray.400" boxSize={5} />}>
-                <Input placeholder="Enter your email" type="email" />
+              <InputGroup startElement={<Icon as={RiMailFill} color="gray.400" boxSize={5} />}>
+                <Input 
+                  placeholder="jamesandrew@gmail.com" 
+                  type="email"
+                  size="lg"
+                  borderRadius="md"
+                  _focus={{
+                    borderColor: "#D32C32",
+                    boxShadow: "0 0 0 1px #D32C32",
+                  }}
+                />
               </InputGroup>
-              <Field.HelperText fontSize="xs">We'll never share your email.</Field.HelperText>
             </Field.Root>
 
-            <Field.Root required>
-              <Field.Label>Password <Field.RequiredIndicator /></Field.Label>
-              <InputGroup startElement={<Icon as={RiLockUnlockFill} color="gray.400" boxSize={5} />}>
-                <Input placeholder="Enter your password" type="password" />
-              </InputGroup>
-            </Field.Root>
+            {/* Password Field */}
+            <Box>
+              <Field.Root required>
+                <Field.Label>Password <Field.RequiredIndicator /></Field.Label>
+                <InputGroup startElement={<Icon as={RiLockUnlockFill} color="gray.400" boxSize={5} />}>
+                  <Input 
+                    placeholder="••••••••••••••••••" 
+                    type="password"
+                    size="lg"
+                    borderRadius="md"
+                    _focus={{
+                      borderColor: "#D32C32",
+                      boxShadow: "0 0 0 1px #D32C32",
+                    }}
+                  />
+                </InputGroup>
+              </Field.Root>
+              <Flex justify="flex-end" mt={2}>
+                <Link fontSize="sm" color="black" fontWeight="medium">
+                  Forgot Password?
+                </Link>
+              </Flex>
+            </Box>
 
-            <Button colorScheme="blue" w="full" onClick={handleLocalLogin} size="lg">
-              Login Now
+            {/* Login Button */}
+            <Button
+              bg="#D32C32"
+              color="white"
+              size="lg"
+              w="full"
+              onClick={handleLocalLogin}
+              _hover={{ bg: "#B82329" }}
+              borderRadius="md"
+              fontWeight="medium"
+            >
+              <HStack gap={2}>
+                <Text>Login Now</Text>
+                <Icon as={MdArrowForward} boxSize={5} />
+              </HStack>
             </Button>
 
-            <Text color="gray.500" textAlign="center" fontSize="sm">
-              or
+            {/* OR Text */}
+            <Text fontSize="sm" color="gray.500" textAlign="center">
+              OR
             </Text>
 
-            <Button colorScheme="teal" w="full" onClick={handleCognitoLogin} size="lg">
-              Login with Google
-            </Button>
+            {/* Social Login Buttons */}
+            <HStack gap={3}>
+              <Button
+                flex="1"
+                bg="black"
+                color="white"
+                onClick={handleCognitoLogin}
+                size="lg"
+                _hover={{ bg: "gray.800" }}
+                borderRadius="md"
+                fontWeight="medium"
+              >
+                <HStack gap={2}>
+                  <Icon as={FaGoogle} />
+                  <Text>Google</Text>
+                </HStack>
+              </Button>
+              <Button
+                flex="1"
+                bg="black"
+                color="white"
+                size="lg"
+                _hover={{ bg: "gray.800" }}
+                borderRadius="md"
+                fontWeight="medium"
+              >
+                <HStack gap={2}>
+                  <Icon as={FaFacebook} />
+                  <Text>Facebook</Text>
+                </HStack>
+              </Button>
+            </HStack>
+
+            {/* Footer */}
+            <Text fontSize="xs" color="gray.600" textAlign="center" mt={4}>
+              © 2025 ThinkMoves. All rights reserved.
+            </Text>
           </VStack>
         </Box>
       </Flex>

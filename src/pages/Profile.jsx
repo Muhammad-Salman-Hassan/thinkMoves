@@ -80,9 +80,9 @@ function InboxItem({ item, onViewItem }) {
     const formatDate = (epochMs) => {
         if (!epochMs) return 'Unknown date';
         const date = new Date(parseInt(epochMs));
-        return date.toLocaleDateString('en-US', { 
-            month: 'short', 
-            day: 'numeric', 
+        return date.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
             year: 'numeric',
             hour: '2-digit',
             minute: '2-digit'
@@ -102,13 +102,13 @@ function InboxItem({ item, onViewItem }) {
             onClick={() => onViewItem?.(item)}
         >
             <Flex align="center" gap={3} flex={1}>
-                <Box 
-                    w="40px" 
-                    h="40px" 
-                    borderRadius="md" 
-                    bg="red.50" 
-                    display="flex" 
-                    alignItems="center" 
+                <Box
+                    w="40px"
+                    h="40px"
+                    borderRadius="md"
+                    bg="red.50"
+                    display="flex"
+                    alignItems="center"
                     justifyContent="center"
                 >
                     <FiMail color="#DE252C" size={20} />
@@ -145,12 +145,12 @@ export default function ProfileUI() {
         pendingOutbound: []
     });
     const [isAddFriendModalOpen, setIsAddFriendModalOpen] = useState(false);
-    
-   
+
+
     const [inboxData, setInboxData] = useState([]);
     const [inboxLoading, setInboxLoading] = useState(false);
-    const [showInbox, setShowInbox] = useState(false);
-    
+    const [showInbox, setShowInbox] = useState(true);
+
     const token = localStorage.getItem("id_token");
 
     useEffect(() => {
@@ -219,13 +219,15 @@ export default function ProfileUI() {
     };
 
     const handleViewInboxItem = (item) => {
-        console.log("View item:", item);
-      
+
+
         if (item?.itemType === 'game' && item?.itemID) {
-           
+
             const gameId = item.itemID;
             navigate(`/analyze/${encodeURIComponent(gameId)}`);
-         
+
+        } else {
+            navigate(`/view-position?posID=${encodeURIComponent(item.itemID)}`);
         }
     };
 
@@ -510,9 +512,9 @@ export default function ProfileUI() {
                             <Heading fontSize={{ base: "2xl", sm: "4xl", md: "5xl", lg: "5xl" }} fontFamily="'Clash Display', sans-serif" color="black" fontWeight="600">
                                 Profile & Friends
                             </Heading>
-                            
-                            
-                            <Button
+
+
+                            {/* <Button
                                 size="lg"
                                 variant="outline"
                                 borderRadius="full"
@@ -540,15 +542,15 @@ export default function ProfileUI() {
                                         {inboxData.length}
                                     </Badge>
                                 )}
-                            </Button>
+                            </Button> */}
                         </Flex>
 
-                       
-                        
+
+
 
                         <Flex gap={6} wrap={{ base: "wrap", lg: "nowrap" }} align="flex-start">
                             <Flex direction="column" gap={6} w={{ base: "100%", lg: "320px" }} flexShrink={0}>
-                                
+
                                 <Box
                                     p={6}
                                     borderRadius="3xl"
@@ -689,7 +691,7 @@ export default function ProfileUI() {
                                     </Flex>
                                 </Box>
 
-                               
+
                                 <Box
                                     borderRadius="xl"
                                     boxShadow="sm"
@@ -806,7 +808,7 @@ export default function ProfileUI() {
                                 </Box>
                             </Flex>
 
-                            
+
                             <Flex direction="column" flex={1} gap={6} w="100%">
                                 <Box
                                     p={6}
@@ -851,51 +853,51 @@ export default function ProfileUI() {
                                     </Flex>
                                 </Box>
                                 {showInbox && (
-                            <Box
-                                mb={6}
-                                p={6}
-                                borderRadius="xl"
-                                boxShadow="sm"
-                                bg="white"
-                                border="1px solid #f0f0f0"
-                            >
-                                <Flex align="center" justify="space-between" mb={4}>
-                                    <Text fontWeight="bold" fontSize="18px">
-                                        INBOX ({inboxData?.length || 0})
-                                    </Text>
-                                    <IconButton
+                                    <Box
+                                        mb={6}
+                                        p={6}
+                                        borderRadius="xl"
+                                        boxShadow="sm"
+                                        bg="white"
+                                        border="1px solid #f0f0f0"
+                                    >
+                                        <Flex align="center" justify="space-between" mb={4}>
+                                            <Text fontWeight="bold" fontSize="18px">
+                                                INBOX ({inboxData?.length || 0})
+                                            </Text>
+                                            {/* <IconButton
                                         size="sm"
                                         variant="ghost"
-                                        onClick={() => setShowInbox(false)}
+                                        // onClick={() => setShowInbox(false)}
                                     >
                                         <FiX />
-                                    </IconButton>
-                                </Flex>
+                                    </IconButton> */}
+                                        </Flex>
 
-                                {inboxLoading ? (
-                                    <Flex justify="center" py={8}>
-                                        <Spinner size="lg" color="#DE252C" />
-                                    </Flex>
-                                ) : inboxData?.length > 0 ? (
-                                    <Flex direction="column" gap={3} maxH="400px" overflowY="auto">
-                                        {inboxData.map((item, index) => (
-                                            <InboxItem
-                                                key={item?.itemID || index}
-                                                item={item}
-                                                onViewItem={handleViewInboxItem}
-                                            />
-                                        ))}
-                                    </Flex>
-                                ) : (
-                                    <Flex direction="column" align="center" justify="center" py={8}>
-                                        <FiInbox size={48} color="#ccc" />
-                                        <Text textAlign="center" color="gray.500" mt={4} fontSize="sm">
-                                            No items in your inbox
-                                        </Text>
-                                    </Flex>
+                                        {inboxLoading ? (
+                                            <Flex justify="center" py={8}>
+                                                <Spinner size="lg" color="#DE252C" />
+                                            </Flex>
+                                        ) : inboxData?.length > 0 ? (
+                                            <Flex direction="column" gap={3} maxH="400px" overflowY="auto">
+                                                {inboxData.map((item, index) => (
+                                                    <InboxItem
+                                                        key={item?.itemID || index}
+                                                        item={item}
+                                                        onViewItem={handleViewInboxItem}
+                                                    />
+                                                ))}
+                                            </Flex>
+                                        ) : (
+                                            <Flex direction="column" align="center" justify="center" py={8}>
+                                                <FiInbox size={48} color="#ccc" />
+                                                <Text textAlign="center" color="gray.500" mt={4} fontSize="sm">
+                                                    No items in your inbox
+                                                </Text>
+                                            </Flex>
+                                        )}
+                                    </Box>
                                 )}
-                            </Box>
-                        )}
                             </Flex>
                         </Flex>
                     </Container>

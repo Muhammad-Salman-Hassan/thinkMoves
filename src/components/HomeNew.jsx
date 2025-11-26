@@ -37,7 +37,9 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import { LuSearch } from "react-icons/lu";
 import ShareGameModal from "./ShareGame";
-
+import { MdFirstPage, MdLastPage } from 'react-icons/md';
+import whitegradient from "../assets/whitebg.png";
+import gradient from "../assets/gradientbg.png";
 export default function HomeNew({ isEdit }) {
     const chessGameRef = useRef(new Chess());
     const chessGame = chessGameRef.current;
@@ -352,27 +354,59 @@ export default function HomeNew({ isEdit }) {
 
 
     const moveBackward = () => {
+    if (currentMoveIndex >= 0) {
+        const newIndex = currentMoveIndex - 1;
 
-        if (currentMoveIndex >= 0) {
-            const newIndex = currentMoveIndex - 1;
+        chessGame.reset();
 
-
-            chessGame.reset();
-
-
-            for (let i = 0; i <= newIndex - 1; i++) {
-                try {
-                    chessGame.move(moveHistory[i]);
-                } catch (error) {
-                    console.error(`Failed to apply move ${i}: ${moveHistory[i]}`, error);
-                    return;
-                }
+        for (let i = 0; i <= newIndex; i++) {
+            try {
+                chessGame.move(moveHistory[i]);
+            } catch (error) {
+                console.error(`Failed to apply move ${i}: ${moveHistory[i]}`, error);
+                return;
             }
-
-            setChessPosition(chessGame.fen());
-            setCurrentMoveIndex(newIndex);
         }
-    };
+
+        setChessPosition(chessGame.fen());
+        setCurrentMoveIndex(newIndex);
+    }
+};
+
+const moveToStart = () => {
+    // Go to first move (index 0)
+    if (moveHistory.length > 0) {
+        chessGame.reset();
+        
+        try {
+            chessGame.move(moveHistory[0]);
+            setChessPosition(chessGame.fen());
+            setCurrentMoveIndex(0);
+        } catch (error) {
+            console.error('Failed to apply first move:', error);
+        }
+    }
+};
+
+const moveToEnd = () => {
+    // Go to second-to-last move (length - 2)
+    if (moveHistory.length > 1) {
+        chessGame.reset();
+
+        for (let i = 0; i < moveHistory.length - 1; i++) {
+            try {
+                chessGame.move(moveHistory[i]);
+            } catch (error) {
+                console.error(`Failed to apply move ${i}: ${moveHistory[i]}`, error);
+                return;
+            }
+        }
+
+        setChessPosition(chessGame.fen());
+        setCurrentMoveIndex(moveHistory.length - 2);
+    }
+};
+
 
 
 
@@ -479,9 +513,10 @@ export default function HomeNew({ isEdit }) {
 
 
     const handleRecheck = async () => {
+        setRechecingLoading(true);
         try {
-            setRechecingLoading(true);
 
+            setSearchTerm("")
             const aws_accessKey = import.meta.env.VITE_AWS_ACCESS_KEY_ID;
             const aws_secretAccessKey = import.meta.env.VITE_AWS_SECRET_ACCESS_KEY;
             const lambdaFunctionName = import.meta.env.VITE_LAMBDA_RECHECK_FUNCTION_NAME;
@@ -724,26 +759,64 @@ export default function HomeNew({ isEdit }) {
                             <VStack spacing={4} w="full" align="center">
 
                                 <HStack spacing={4} wrap="wrap" justify="center" w="full">
-                                    <IconButton bg="#D32C32" color="white" onClick={resetBoard}>
+                                    {/* Reset Button */}
+                                    <IconButton
+                                        bg="#D32C32"
+                                        color="white"
+                                        onClick={resetBoard}
+                                        aria-label="Reset board"
+                                        _hover={{ bg: "#B82329" }}
+                                    >
                                         <RiResetLeftFill />
                                     </IconButton>
+
+                                    {/* First Move Button */}
+                                    <IconButton
+                                        bg="#D32C32"
+                                        color="white"
+                                        onClick={moveToStart}
+                                        isDisabled={currentMoveIndex < 0}
+                                        aria-label="Go to start"
+                                        _hover={{ bg: "#B82329" }}
+                                    >
+                                        <MdFirstPage />
+                                    </IconButton>
+
+                                    {/* Previous Move Button */}
                                     <IconButton
                                         bg="#D32C32"
                                         color="white"
                                         onClick={moveBackward}
                                         isDisabled={currentMoveIndex < 0}
+                                        aria-label="Previous move"
+                                        _hover={{ bg: "#B82329" }}
                                     >
                                         <IoMdArrowRoundBack />
                                     </IconButton>
+
+                                    {/* Next Move Button */}
                                     <IconButton
                                         bg="#D32C32"
                                         color="white"
                                         onClick={moveForward}
                                         isDisabled={currentMoveIndex >= moveHistory.length - 1}
+                                        aria-label="Next move"
+                                        _hover={{ bg: "#B82329" }}
                                     >
                                         <IoMdArrowRoundForward />
                                     </IconButton>
 
+                                    {/* Last Move Button */}
+                                    <IconButton
+                                        bg="#D32C32"
+                                        color="white"
+                                        onClick={moveToEnd}
+                                        isDisabled={currentMoveIndex >= moveHistory.length - 1}
+                                        aria-label="Go to end"
+                                        _hover={{ bg: "#B82329" }}
+                                    >
+                                        <MdLastPage />
+                                    </IconButton>
                                 </HStack>
 
                                 <HStack
@@ -951,6 +1024,7 @@ export default function HomeNew({ isEdit }) {
                                                     {
                                                         <>
                                                             <Field.Root>
+                                                                <Field.Label color="black" fontSize={"xs"}>White Move{whiteMove.moveNumber}</Field.Label>
                                                                 <Input
                                                                     name={`whiteMove_${whiteMove.moveNumber}`}
                                                                     value={
@@ -970,6 +1044,7 @@ export default function HomeNew({ isEdit }) {
 
 
                                                             <Field.Root>
+                                                                <Field.Label color="black" fontSize={"xs"}>White Move Image</Field.Label>
                                                                 {whiteMove.url && (
                                                                     <Box
                                                                         bg={whiteStyle.bgColor}
@@ -994,6 +1069,7 @@ export default function HomeNew({ isEdit }) {
 
 
                                                             <Field.Root>
+                                                                <Field.Label color="black" fontSize={"xs"}>Black Move Image</Field.Label>
                                                                 {blackMove?.url && (
                                                                     <Box
                                                                         bg={blackStyle.bgColor}
@@ -1018,6 +1094,7 @@ export default function HomeNew({ isEdit }) {
 
 
                                                             <Field.Root>
+                                                                <Field.Label color="black" fontSize={"xs"}>Black Move {whiteMove.moveNumber}</Field.Label>
                                                                 <Input
                                                                     name={`blackMove_${whiteMove.moveNumber}`}
                                                                     value={
@@ -1123,7 +1200,7 @@ export default function HomeNew({ isEdit }) {
                 {formData.metadata && Object.keys(formData.metadata).length > 0 && (
                     <Box mt={6}>
                         <Text fontSize="xl" fontWeight="semibold" mb={3}>
-                            Game Metadata
+                            Game Details from the Sheet.
                         </Text>
                         <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
                             {Object.entries(formData.metadata).map(([key, value]) => (
@@ -1146,6 +1223,219 @@ export default function HomeNew({ isEdit }) {
 
 
             </Container>
+             <Box position="relative" overflow="hidden" bg={"black"}>
+                {[
+                                    { src: gradient, right: "-20%", top: "-30%" },
+                
+                
+                                    { src: whitegradient, left: "-20%", top: "-40%" },
+                
+                                ].map((bg, i) => (
+                                    <Box
+                                        key={i}
+                                        position="absolute"
+                                        {...bg}
+                                        width={{ base: "100%", md: "600px", lg: "800px" }}
+                                        height={{ base: "200px", md: "600px", lg: "1000px" }}
+                                        zIndex="1"
+                                    >
+                                        <Image src={bg.src} alt="bg" w="100%" h="100%" objectFit="contain" />
+                                    </Box>
+                                ))}
+
+                <Container maxW="container.xl" px={{ base: 4, md: 8 }} position="relative" zIndex="1">
+                    <Box mx="auto" py={{ base: 16, md: 24 }}>
+                        {/* 2-Column Layout */}
+                        <Box
+                            display="grid"
+                            gridTemplateColumns={{ base: "1fr", md: "35% 65%" }}
+                            alignItems="start"
+                            gap={8}
+                            mb={12}
+                        >
+                            {/* LEFT COLUMN */}
+                            <Box>
+                                <Text
+                                    fontSize="lg"
+                                    letterSpacing="2px"
+                                    textTransform="uppercase"
+                                    fontFamily="'Clash Display', sans-serif"
+                                    color="#D32C32"
+                                    mb={4}
+                                    fontWeight="semibold"
+                                >
+                                    <Text as="span" color="red" fontSize="18px">●</Text> DEEP ANALYZE BETA
+                                </Text>
+                                
+                            </Box>
+
+                            {/* RIGHT COLUMN */}
+                            <Box>
+                                <Text
+                                    fontSize={{ base: "2xl", md: "4xl", lg: "5xl" }}
+                                    fontWeight="600"
+                                    fontFamily="'Clash Display', sans-serif"
+                                    mb={6}
+                                    lineHeight="short"
+                                    color={"white"}
+                                >
+                                    POWERED BY THE{" "}
+                                    <Text as="span" color="#D32C32">
+                                        STOCKFISH 17.1
+                                    </Text>{" "}
+                                    CHESS ENGINE
+                                </Text>
+
+                                <Text
+                                    fontSize={{ base: "sm", md: "md" }}
+                                    color="#FFFFFF"
+                                    mb={6}
+                                    opacity="0.9"
+                                >
+                                    Right now we analyze your full game up to depth 15 – higher depth and 
+                                    stronger evaluations are coming soon.
+                                </Text>
+                            </Box>
+                        </Box>
+
+                        {/* What You Get Section */}
+                        <Box mb={12}>
+                            <Text
+                                fontSize="2xl"
+                                fontWeight="semibold"
+                                fontFamily="'Clash Display', sans-serif"
+                                mb={6}
+                                color="white"
+                            >
+                                When you hit Deep Analyze, ThinkMoves will:
+                            </Text>
+                            <Box
+                                display="grid"
+                                gridTemplateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}
+                                gap={6}
+                            >
+                                {[
+                                    {
+                                        number: "01",
+                                        title: "COMPARE HOW WHITE AND BLACK PLAYED ACROSS THE WHOLE GAME"
+                                    },
+                                    {
+                                        number: "02",
+                                        title: "SHOW MOVE-BY-MOVE LABELS LIKE BEST, GOOD, INACCURACY, MISTAKE, AND BLUNDER"
+                                    },
+                                    {
+                                        number: "03",
+                                        title: "HIGHLIGHT CRITICAL MOMENTS WHERE THE GAME TURNED IN YOUR FAVOR OR SLIPPED AWAY"
+                                    },
+                                    {
+                                        number: "04",
+                                        title: "SUGGEST STRONGER MOVES SO YOU CAN SEE WHAT YOU SHOULD HAVE PLAYED"
+                                    },
+                                ].map((item) => (
+                                    <Box
+                                        key={item.number}
+                                        borderRadius="10px 10px 0 0"
+                                        border="2px solid rgba(255,255,255,0.3)"
+                                        overflow="hidden"
+                                        bg="linear-gradient(331.39deg, rgba(0,0,0,0) -1.53%, rgba(255,255,255,0.17) 81.73%)"
+                                        py={8}
+                                        px={6}
+                                        textAlign="left"
+                                        transition="all 0.3s"
+                                        _hover={{ transform: "translateY(-4px)" }}
+                                    >
+                                        <Flex gap={6} align="start">
+                                            <Text 
+                                                fontSize="xl" 
+                                                fontWeight="bold" 
+                                                color="white" 
+                                                minW="40px"
+                                            >
+                                                {item.number}
+                                            </Text>
+                                            <Text 
+                                                fontSize="md" 
+                                                fontWeight="semibold" 
+                                                lineHeight="short" 
+                                                fontFamily="'Clash Display', sans-serif"
+                                                color={"white"}
+                                            >
+                                                {item.title}
+                                            </Text>
+                                        </Flex>
+                                    </Box>
+                                ))}
+                            </Box>
+                        </Box>
+
+                        {/* Coming Soon Section */}
+                        <Box mb={12}>
+                            <Text
+                                fontSize="2xl"
+                                fontWeight="semibold"
+                                fontFamily="'Clash Display', sans-serif"
+                                mb={6}
+                                color="white"
+                            >
+                                Coming soon:
+                            </Text>
+                            <Box
+                                display="grid"
+                                gridTemplateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}
+                                gap={6}
+                            >
+                                {[
+                                    {
+                                        number: "01",
+                                        title: "DEEPER STOCKFISH ANALYSIS WITH RICHER GAME STATS AND GRAPHS"
+                                    },
+                                    {
+                                        number: "02",
+                                        title: "AN INTERACTIVE \"COACH\" CHATBOT YOU CAN ASK THINGS LIKE: \"WHY IS MOVE 17 A BLUNDER?\" OR \"WHAT WAS MY BIGGEST MISTAKE IN THIS GAME?\""
+                                    },
+                                ].map((item) => (
+                                    <Box
+                                        key={item.number}
+                                        borderRadius="10px 10px 0 0"
+                                        border="2px solid rgba(255,255,255,0.2)"
+                                        overflow="hidden"
+                                        bg="linear-gradient(331.39deg, rgba(0,0,0,0) -1.53%, rgba(255,255,255,0.1) 81.73%)"
+                                        py={8}
+                                        px={6}
+                                        textAlign="left"
+                                        transition="all 0.3s"
+                                        _hover={{ transform: "translateY(-4px)" }}
+                                    >
+                                        <Flex gap={6} align="start">
+                                            <Text 
+                                                fontSize="xl" 
+                                                fontWeight="bold" 
+                                               color={"white"}
+                                                minW="40px"
+                                                opacity="0.7"
+                                            >
+                                                {item.number}
+                                            </Text>
+                                            <Text 
+                                                fontSize="md" 
+                                                fontWeight="semibold" 
+                                                lineHeight="short" 
+                                                fontFamily="'Clash Display', sans-serif"
+                                                opacity="0.8"
+                                                color={"white"}
+                                            >
+                                                {item.title}
+                                            </Text>
+                                        </Flex>
+                                    </Box>
+                                ))}
+                            </Box>
+                        </Box>
+
+                        
+                    </Box>
+                </Container>
+            </Box>
             <Container maxW="container.xl" px={{ base: 4, md: 8 }} zIndex="1" my={8}>
 
 

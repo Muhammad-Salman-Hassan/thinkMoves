@@ -141,24 +141,23 @@ export default function Footer() {
                     >
                         <VStack align="flex-start" spacing={3}>
                             <Heading size="sm" fontWeight="600" mb={2}>
-                                Quick Links
+                                Resources
                             </Heading>
                             <Link href="/about-us" color="gray.300">About</Link>
-                            {/* <Link href="#" color="gray.300">Analyse</Link> */}
+
                             <Link href="/library" color="gray.300">Library</Link>
-                            {/* <Link href="#" color="gray.300">Products</Link> */}
-                            <Link href="/login" color="gray.300">Login</Link>
+
                             <Link href="/feedback" color="gray.300">Feed Back</Link>
                         </VStack>
 
-                        <VStack align="flex-start" spacing={3}>
+                        {/* <VStack align="flex-start" spacing={3}>
                             <Heading size="sm" fontWeight="600" mb={2}>
                                 Our Services
                             </Heading>
                             <Link href="#" color="gray.300">Opening Mastery Guide</Link>
                             <Link href="#" color="gray.300">ThinkMoves T-Shirt</Link>
                             <Link href="#" color="gray.300">Mastering Middlegames</Link>
-                        </VStack>
+                        </VStack> */}
 
                         <VStack align="flex-start" spacing={3}>
                             <Heading size="sm" fontWeight="600" mb={2}>
@@ -169,9 +168,9 @@ export default function Footer() {
                                 info@thinkmoves.com
                             </Link>
                             <Text>
-                                2930 Hillcroft St Houston
+                                Houston
                                 <br />
-                                TX 77057
+                                TX 
                             </Text>
                         </VStack>
                     </Flex>

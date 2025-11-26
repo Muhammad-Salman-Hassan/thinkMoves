@@ -4,12 +4,13 @@ import { BASE_URL } from '../utils/service';
 import axios from 'axios';
 import ChartComponent from './ErrorCharts';
 import { IoMdArrowRoundForward } from 'react-icons/io';
+import { Tooltip } from './ToolTip';
 
 const ChessAnalysis = ({ correctMoves }) => {
 
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(false);
-
+    const isLoggedIn = !!localStorage.getItem('id_token');
 
     const fetchAnalysis = async () => {
         const token = localStorage.getItem('id_token');
@@ -54,36 +55,57 @@ const ChessAnalysis = ({ correctMoves }) => {
             </Flex>
         );
     }
-
+    const tooltipContent = (
+        <Box maxW="400px" p={2}>
+            <Text fontWeight="bold" mb={2}>Deep Analyze (beta)</Text>
+            <Text fontSize="sm">Deep Analyze can happen only after you login.And Have some correct moves</Text>
+        </Box>
+    );
     if (!data) {
         return (
-            <Flex align="center" justify="center" >
-                <Button
-                    onClick={fetchAnalysis}
-                    bg="#D32C32"
-                    color="white"
-                    size="lg"
+            <Flex align="center" justify="center" direction="column" gap={3}>
+                
 
-                    _hover={{ bg: "red.600" }}
-                    disabled={correctMoves.length === 0}
-                    borderRadius="14.82px"
-                    border="1px solid"
-                    borderColor="linear-gradient(265.38deg, rgba(255, 255, 255, 0.6) 24.8%, rgba(255, 255, 255, 0.3) 85.32%)"
-
+                {!isLoggedIn && (
+                    <Text fontSize="sm" color="gray.600" fontWeight="medium">
+                        Deep Analyze can happen only after you login.
+                    </Text>
+                )}
+                <Tooltip
+                    content={tooltipContent}
+                    contentStyleProps={{
+                        bg: "white",
+                        color: "black",
+                        border: "1px solid",
+                        borderColor: "gray.200",
+                        borderRadius: "lg",
+                        boxShadow: "lg",
+                    }}
+                    showArrow
+                    disabled={!isLoggedIn}
                 >
-                    Deep Analyze <Box bg="black" p={1} borderRadius="full" border="1px solid white">
-                        <IoMdArrowRoundForward />
-                    </Box>
-                </Button>
+                    <Button
+                        onClick={isLoggedIn ? fetchAnalysis : null}
+                        bg="#D32C32"
+                        color="white"
+                        size="lg"
+                        _hover={{ bg: "red.600" }}
+                        disabled={correctMoves.length === 0}
+                        borderRadius="14.82px"
+                        border="1px solid"
+                        borderColor="linear-gradient(265.38deg, rgba(255, 255, 255, 0.6) 24.8%, rgba(255, 255, 255, 0.3) 85.32%)"
+                    >
+                        Deep Analyze <Box bg="black" p={1} borderRadius="full" border="1px solid white">
+                            <IoMdArrowRoundForward />
+                        </Box>
+                    </Button>
+                </Tooltip>
             </Flex>
         );
     }
 
 
-    const allPainPoints = [
-        ...(data.players?.white?.topPainPoints || []),
-        ...(data.players?.black?.topPainPoints || []),
-    ].sort((a, b) => b.lossCp - a.lossCp);
+
     return (
         <Box position="relative" overflow="hidden" fontFamily="'Clash Display', sans-serif">
 
@@ -125,6 +147,7 @@ const ChessAnalysis = ({ correctMoves }) => {
             />
 
             <Container maxW="container.xl" px={{ base: 4, md: 8 }} zIndex="1" position="relative" py={8}>
+
                 <Flex justify="center" align="center" mb={8}>
                     <Button
                         onClick={fetchAnalysis}

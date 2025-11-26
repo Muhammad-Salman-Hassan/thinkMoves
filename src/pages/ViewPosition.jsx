@@ -10,12 +10,14 @@ import GradientBg from "../components/GradientBg";
 import { Tooltip } from "../components/ToolTip";
 import SavePositionModal from "../components/SavePosition";
 import { LuSave } from "react-icons/lu";
+import ShareGameModal from "../components/ShareGame";
 
 
 const ViewPosition = () => {
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const fenFromUrl = queryParams.get("fen");
+    const posIdFromUrl = queryParams.get("posID");
 
     const chessGameRef = useRef(new Chess());
     const chessGame = chessGameRef.current;
@@ -25,6 +27,7 @@ const ViewPosition = () => {
     const [moveHistory, setMoveHistory] = useState([]);
     const [currentMoveIndex, setCurrentMoveIndex] = useState(-1);
     const [isPositionModalOpen, setIsPositionModalOpen] = useState(false);
+    const [isShareGameModal, setIsShareGameModal] = useState(false);
 
 
     useEffect(() => {
@@ -38,43 +41,43 @@ const ViewPosition = () => {
         }
     }, [fenFromUrl, chessGame]);
 
- 
+
 
     const resetBoard = () => {
         if (fenFromUrl) {
-            chessGame.load(fenFromUrl); 
+            chessGame.load(fenFromUrl);
         } else {
-            chessGame.reset(); 
+            chessGame.reset();
         }
         setChessPosition(chessGame.fen());
         setMoveHistory([]);
         setCurrentMoveIndex(-1);
     };
-    
+
 
     const handlePositionChange = (newPosition, move) => {
         setChessPosition(newPosition);
-    
-      
+
+
         const newHistory = moveHistory.slice(0, currentMoveIndex + 1);
         if (move) newHistory.push(move);
-    
+
         setMoveHistory(newHistory);
         setCurrentMoveIndex(newHistory.length - 1);
     };
-    
+
     const randomMove = () => {
         const possibleMoves = chessGame.moves();
         if (possibleMoves.length === 0) return;
-    
+
         const move = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
         chessGame.move(move);
         handlePositionChange(chessGame.fen(), move);
     };
-    
 
 
-    
+
+
 
     const payload = {
         fen: chessPosition,
@@ -149,7 +152,7 @@ const ViewPosition = () => {
                                 <IconButton bg="#D32C32" color="white" onClick={resetBoard}>
                                     <RiResetLeftFill />
                                 </IconButton>
-                                
+
                                 <IconButton bg="#D32C32" color="white" onClick={randomMove}>
                                     <FaRandom />
                                 </IconButton>
@@ -165,6 +168,14 @@ const ViewPosition = () => {
                             >
                                 Save Position <LuSave />
                             </IconButton>
+                            <IconButton
+                                bg="#D32C32"
+                                color="white"
+                                onClick={() => setIsShareGameModal(true)}
+                                px={2}
+                            >
+                                Share Position <LuSave />
+                            </IconButton>
                         </VStack>
                     </VStack>
                 </Flex>
@@ -175,6 +186,13 @@ const ViewPosition = () => {
                 isOpen={isPositionModalOpen}
                 onClose={() => setIsPositionModalOpen(false)}
                 payload={payload}
+            />
+
+            <ShareGameModal
+                isOpen={isShareGameModal}
+                onClose={() => setIsShareGameModal(false)}
+                type="position"
+                payload={{ gameId: posIdFromUrl }}
             />
         </GradientBg>
     );

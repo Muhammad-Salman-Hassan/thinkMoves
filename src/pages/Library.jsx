@@ -90,8 +90,8 @@ const Library = () => {
         navigate(`/analyze/${encodeURIComponent(gameId)}`);
     };
 
-    const handleViewPosition = (fen) => {
-        navigate(`/view-position?fen=${encodeURIComponent(fen)}`)
+    const handleViewPosition = (fen, posID) => {
+        navigate(`/view-position?fen=${encodeURIComponent(fen)}&posID=${encodeURIComponent(posID)}`);
 
     };
 
@@ -191,7 +191,7 @@ const Library = () => {
                             onClick={() =>
                                 type === "game"
                                     ? handleViewGame(item.gameId)
-                                    : handleViewPosition(item.fen)
+                                    : handleViewPosition(item.fen, item.posID)
                             }
                             px={8}
                             me={2}
@@ -212,7 +212,7 @@ const Library = () => {
                             onClick={() =>
                                 type === "game"
                                     ? handleViewGame(item.gameId)
-                                    : handleViewPosition(item.fen)
+                                    : handleViewPosition(item.fen, item.posID)
                             }
                             _hover={{ bg: "#b92027" }}
                         >
@@ -305,7 +305,7 @@ const Library = () => {
                             border={"1px solid"}
                             borderColor={"black"}
                             borderRadius={"full"}
-                            onClick={() => handleViewPosition(position.fen)}
+                            onClick={() => handleViewPosition(position.fen, position.posID)}
                             px={8}
                             me={2}
                         >
@@ -322,7 +322,7 @@ const Library = () => {
                             alignItems="center"
                             justifyContent="center"
                             cursor="pointer"
-                            onClick={() => handleViewPosition(position.fen)}
+                            onClick={() => handleViewPosition(position.fen, position.posID)}
                             _hover={{ bg: "#b92027" }}
                         >
                             <MdOutlineArrowOutward style={{ fontSize: "12px" }} />

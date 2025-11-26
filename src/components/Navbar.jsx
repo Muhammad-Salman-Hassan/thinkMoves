@@ -13,7 +13,8 @@ import {
 } from "@chakra-ui/react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FaArrowRight, FaBars } from "react-icons/fa";
-import { RiProfileFill } from "react-icons/ri";
+import { Tooltip } from "./ToolTip";
+
 
 export default function Navbar() {
     const navigate = useNavigate();
@@ -22,10 +23,7 @@ export default function Navbar() {
     const location = useLocation();
     const currentPath = location.pathname;
 
-    const handleNavigate = () => {
-        navigate("/profile");
-        onClose();
-    };
+
 
     const handleLogout = () => {
         localStorage.clear();
@@ -33,37 +31,61 @@ export default function Navbar() {
         navigate("/");
     };
 
-    const NavLinks = () => {
-        // Base links always visible
-        const baseLinks = [
-            { name: "Home", to: "/" },
-            { name: "About", to: "/about-us" },
-        ];
+  const NavLinks = () => {
+    const links = [
+        { name: "Home", to: "/", protected: false },
+        { name: "About", to: "/about-us", protected: false },
+        { name: "Library", to: "/library", protected: true },
+        { name: "Profile", to: "/profile", protected: true },
+    ];
 
-        // Protected links only visible when logged in
-        const protectedLinks = token ? [
-            { name: "Library", to: "/library" },
-            { name: "Profile", to: "/profile" },
-        ] : [];
+    return links.map(link => {
+        const isDisabled = link.protected && !token;
+        const isActive = currentPath === link.to;
 
-        // Combine links
-        const links = [...baseLinks, ...protectedLinks];
-
-        return links.map(link => (
+        const linkElement = (
             <ChakraLink
-                as={Link}
-                to={link.to}
+                as={isDisabled ? "span" : Link}
+                to={isDisabled ? undefined : link.to}
                 key={link.to}
-                color={currentPath === link.to ? "#D32C32" : "gray.800"}
-                fontWeight={currentPath === link.to ? "700" : "500"}
-                _hover={{ color: "#D32C32", textDecoration: "none" }}
+                color={
+                    isDisabled
+                        ? "gray.400"
+                        : isActive
+                        ? "#D32C32"
+                        : "gray.800"
+                }
+                cursor={isDisabled ? "not-allowed" : "pointer"}
+                fontWeight={isActive ? "700" : "500"}
+                opacity={isDisabled ? 0.6 : 1}
+                _hover={
+                    isDisabled
+                        ? { textDecoration: "none" }
+                        : { color: "#D32C32", textDecoration: "none" }
+                }
                 mx={4}
-                onClick={onClose}
+                onClick={isDisabled ? undefined : onClose}
             >
                 {link.name}
             </ChakraLink>
-        ));
-    };
+        );
+
+        if (!isDisabled) return linkElement;
+
+        return (
+            <Tooltip
+                key={link.to}
+                content="To access this page.You need to login first"
+                showArrow
+                placement="bottom"
+            >
+                {linkElement}
+            </Tooltip>
+        );
+    });
+};
+
+
 
     return (
         <Box
@@ -84,6 +106,8 @@ export default function Navbar() {
                         backgroundClip="text"
                         color="transparent"
                         fontWeight="600"
+                        cursor={"pointer"}
+                        onClick={() => navigate("/")}
                     >
                         THINKMOVES
                     </Heading>
