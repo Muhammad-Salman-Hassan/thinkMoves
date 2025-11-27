@@ -114,8 +114,8 @@ function InboxItem({ item, onViewItem }) {
                     <FiMail color="#DE252C" size={20} />
                 </Box>
                 <Box flex={1}>
-                    <Text fontSize="14px" fontWeight="medium" noOfLines={1}>
-                        {item?.itemType?.toUpperCase() ?? 'ITEM'} Shared
+                    <Text fontSize="12px" fontWeight="semibold" noOfLines={1} letterSpacing={"1px"}>
+                       {item?.senderUserName} Shared {item?.itemType?.toUpperCase() ?? 'ITEM'}
                     </Text>
                     <Text fontSize="12px" color="gray.600" noOfLines={1}>
                         {item?.message || 'No message'}
@@ -823,7 +823,7 @@ export default function ProfileUI() {
                                 >
                                     <Flex align="center" gap={2} mb={4}>
                                         <Text fontWeight="bold" fontSize="18px">
-                                            GAMEPLAY INSIGHTS
+                                           Personalized Gameplay Insights
                                         </Text>
                                     </Flex>
 
@@ -844,7 +844,7 @@ export default function ProfileUI() {
                                 >
                                     <Flex align="center" gap={2} mb={4}>
                                         <Text fontWeight="bold" fontSize="18px">
-                                            ADVANCED STATS
+                                            Personalized GamePlay Insights
                                         </Text>
                                     </Flex>
 

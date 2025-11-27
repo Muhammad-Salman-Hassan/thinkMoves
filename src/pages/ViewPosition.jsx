@@ -11,6 +11,8 @@ import { Tooltip } from "../components/ToolTip";
 import SavePositionModal from "../components/SavePosition";
 import { LuSave } from "react-icons/lu";
 import ShareGameModal from "../components/ShareGame";
+import axios from "axios";
+import { BASE_URL } from "../utils/service";
 
 
 const ViewPosition = () => {
@@ -28,24 +30,43 @@ const ViewPosition = () => {
     const [currentMoveIndex, setCurrentMoveIndex] = useState(-1);
     const [isPositionModalOpen, setIsPositionModalOpen] = useState(false);
     const [isShareGameModal, setIsShareGameModal] = useState(false);
+    const [data, setData] = useState(null);
 
-
-    useEffect(() => {
-        if (fenFromUrl) {
-            try {
-                chessGame.load(fenFromUrl);
-                setChessPosition(chessGame.fen());
-            } catch (e) {
-                console.error("Invalid FEN:", e);
-            }
+    const token = localStorage.getItem('id_token');
+    console.log(data,"data")
+   useEffect(() => {
+    if (posIdFromUrl) {
+        fetchPosition();
+    } else if (fenFromUrl) {
+        // Load position directly from URL FEN
+        try {
+            chessGame.load(fenFromUrl);
+            setChessPosition(chessGame.fen());
+        } catch (err) {
+            console.error("Invalid FEN in URL:", err);
         }
-    }, [fenFromUrl, chessGame]);
+    }
+}, [posIdFromUrl, fenFromUrl]);
+
+
+// When fetch completes, load the FEN
+useEffect(() => {
+    if (data?.fen) {
+        try {
+            chessGame.load(data.fen);
+            setChessPosition(chessGame.fen());
+        } catch (err) {
+            console.error("Invalid FEN from server:", err);
+        }
+    }
+}, [data]);
+
 
 
 
     const resetBoard = () => {
-        if (fenFromUrl) {
-            chessGame.load(fenFromUrl);
+        if (posIdFromUrl) {
+            chessGame.load(data?.fen || "");
         } else {
             chessGame.reset();
         }
@@ -76,7 +97,20 @@ const ViewPosition = () => {
     };
 
 
+ const fetchPosition = async () => {
+        try {
+            const res = await axios.post(
+                `${BASE_URL}/api/Position/GetAPosition`,
+                {positionID: posIdFromUrl},
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
 
+            setData(res.data);
+
+        } catch (err) {
+            console.error("Error fetching profile:", err);
+        }
+    };
 
 
     const payload = {

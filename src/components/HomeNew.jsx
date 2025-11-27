@@ -354,58 +354,58 @@ export default function HomeNew({ isEdit }) {
 
 
     const moveBackward = () => {
-    if (currentMoveIndex >= 0) {
-        const newIndex = currentMoveIndex - 1;
+        if (currentMoveIndex >= 0) {
+            const newIndex = currentMoveIndex - 1;
 
-        chessGame.reset();
+            chessGame.reset();
 
-        for (let i = 0; i <= newIndex; i++) {
-            try {
-                chessGame.move(moveHistory[i]);
-            } catch (error) {
-                console.error(`Failed to apply move ${i}: ${moveHistory[i]}`, error);
-                return;
+            for (let i = 0; i <= newIndex; i++) {
+                try {
+                    chessGame.move(moveHistory[i]);
+                } catch (error) {
+                    console.error(`Failed to apply move ${i}: ${moveHistory[i]}`, error);
+                    return;
+                }
             }
-        }
 
-        setChessPosition(chessGame.fen());
-        setCurrentMoveIndex(newIndex);
-    }
-};
-
-const moveToStart = () => {
-    // Go to first move (index 0)
-    if (moveHistory.length > 0) {
-        chessGame.reset();
-        
-        try {
-            chessGame.move(moveHistory[0]);
             setChessPosition(chessGame.fen());
-            setCurrentMoveIndex(0);
-        } catch (error) {
-            console.error('Failed to apply first move:', error);
+            setCurrentMoveIndex(newIndex);
         }
-    }
-};
+    };
 
-const moveToEnd = () => {
-    // Go to second-to-last move (length - 2)
-    if (moveHistory.length > 1) {
-        chessGame.reset();
+    const moveToStart = () => {
+        // Go to first move (index 0)
+        if (moveHistory.length > 0) {
+            chessGame.reset();
 
-        for (let i = 0; i < moveHistory.length - 1; i++) {
             try {
-                chessGame.move(moveHistory[i]);
+                chessGame.move(moveHistory[0]);
+                setChessPosition(chessGame.fen());
+                setCurrentMoveIndex(0);
             } catch (error) {
-                console.error(`Failed to apply move ${i}: ${moveHistory[i]}`, error);
-                return;
+                console.error('Failed to apply first move:', error);
             }
         }
+    };
 
-        setChessPosition(chessGame.fen());
-        setCurrentMoveIndex(moveHistory.length - 2);
-    }
-};
+    const moveToEnd = () => {
+        // Go to second-to-last move (length - 2)
+        if (moveHistory.length > 1) {
+            chessGame.reset();
+
+            for (let i = 0; i < moveHistory.length - 1; i++) {
+                try {
+                    chessGame.move(moveHistory[i]);
+                } catch (error) {
+                    console.error(`Failed to apply move ${i}: ${moveHistory[i]}`, error);
+                    return;
+                }
+            }
+
+            setChessPosition(chessGame.fen());
+            setCurrentMoveIndex(moveHistory.length - 2);
+        }
+    };
 
 
 
@@ -1223,37 +1223,22 @@ const moveToEnd = () => {
 
 
             </Container>
-             <Box position="relative" overflow="hidden" bg={"black"}>
-                {[
-                                    { src: gradient, right: "-20%", top: "-30%" },
-                
-                
-                                    { src: whitegradient, left: "-20%", top: "-40%" },
-                
-                                ].map((bg, i) => (
-                                    <Box
-                                        key={i}
-                                        position="absolute"
-                                        {...bg}
-                                        width={{ base: "100%", md: "600px", lg: "800px" }}
-                                        height={{ base: "200px", md: "600px", lg: "1000px" }}
-                                        zIndex="1"
-                                    >
-                                        <Image src={bg.src} alt="bg" w="100%" h="100%" objectFit="contain" />
-                                    </Box>
-                                ))}
+            <Box position="relative" overflow="hidden">
+
 
                 <Container maxW="container.xl" px={{ base: 4, md: 8 }} position="relative" zIndex="1">
                     <Box mx="auto" py={{ base: 16, md: 24 }}>
                         {/* 2-Column Layout */}
                         <Box
                             display="grid"
-                            gridTemplateColumns={{ base: "1fr", md: "35% 65%" }}
+                            gridTemplateColumns={{ base: "1fr", md: "65%" }}
                             alignItems="start"
                             gap={8}
                             mb={12}
                         >
-                            {/* LEFT COLUMN */}
+                            
+
+                            {/* RIGHT COLUMN */}
                             <Box>
                                 <Text
                                     fontSize="lg"
@@ -1266,18 +1251,13 @@ const moveToEnd = () => {
                                 >
                                     <Text as="span" color="red" fontSize="18px">●</Text> DEEP ANALYZE BETA
                                 </Text>
-                                
-                            </Box>
-
-                            {/* RIGHT COLUMN */}
-                            <Box>
                                 <Text
                                     fontSize={{ base: "2xl", md: "4xl", lg: "5xl" }}
                                     fontWeight="600"
                                     fontFamily="'Clash Display', sans-serif"
                                     mb={6}
                                     lineHeight="short"
-                                    color={"white"}
+                                    color={"black"}
                                 >
                                     POWERED BY THE{" "}
                                     <Text as="span" color="#D32C32">
@@ -1288,11 +1268,11 @@ const moveToEnd = () => {
 
                                 <Text
                                     fontSize={{ base: "sm", md: "md" }}
-                                    color="#FFFFFF"
+                                    color="black"
                                     mb={6}
                                     opacity="0.9"
                                 >
-                                    Right now we analyze your full game up to depth 15 – higher depth and 
+                                    Right now we analyze your full game up to depth 15 – higher depth and
                                     stronger evaluations are coming soon.
                                 </Text>
                             </Box>
@@ -1305,9 +1285,9 @@ const moveToEnd = () => {
                                 fontWeight="semibold"
                                 fontFamily="'Clash Display', sans-serif"
                                 mb={6}
-                                color="white"
+                                color="black"
                             >
-                                When you hit Deep Analyze, ThinkMoves will:
+                                When you hit Deep Analyze, ThinkMoves will
                             </Text>
                             <Box
                                 display="grid"
@@ -1334,31 +1314,30 @@ const moveToEnd = () => {
                                 ].map((item) => (
                                     <Box
                                         key={item.number}
-                                        borderRadius="10px 10px 0 0"
-                                        border="2px solid rgba(255,255,255,0.3)"
-                                        overflow="hidden"
-                                        bg="linear-gradient(331.39deg, rgba(0,0,0,0) -1.53%, rgba(255,255,255,0.17) 81.73%)"
-                                        py={8}
-                                        px={6}
-                                        textAlign="left"
-                                        transition="all 0.3s"
-                                        _hover={{ transform: "translateY(-4px)" }}
+                                        p={8}
+                                borderRadius="xl"
+                                bg={"gray.50"}
+                                border="1px solid"
+                                borderColor={"#18181b1a"}
+                                _hover={{ shadow: "lg", transform: "translateY(-3px)" }}
+                                transition="0.2s"
+                                boxShadow={"0px 16px 24px #18181b1a"}
                                     >
                                         <Flex gap={6} align="start">
-                                            <Text 
-                                                fontSize="xl" 
-                                                fontWeight="bold" 
-                                                color="white" 
+                                            <Text
+                                                fontSize="xl"
+                                                fontWeight="bold"
+                                                color="#D32C32"
                                                 minW="40px"
                                             >
                                                 {item.number}
                                             </Text>
-                                            <Text 
-                                                fontSize="md" 
-                                                fontWeight="semibold" 
-                                                lineHeight="short" 
+                                            <Text
+                                                fontSize="md"
+                                                fontWeight="semibold"
+                                                lineHeight="short"
                                                 fontFamily="'Clash Display', sans-serif"
-                                                color={"white"}
+                                                color={"black"}
                                             >
                                                 {item.title}
                                             </Text>
@@ -1368,80 +1347,18 @@ const moveToEnd = () => {
                             </Box>
                         </Box>
 
-                        {/* Coming Soon Section */}
-                        <Box mb={12}>
-                            <Text
-                                fontSize="2xl"
-                                fontWeight="semibold"
-                                fontFamily="'Clash Display', sans-serif"
-                                mb={6}
-                                color="white"
-                            >
-                                Coming soon:
-                            </Text>
-                            <Box
-                                display="grid"
-                                gridTemplateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}
-                                gap={6}
-                            >
-                                {[
-                                    {
-                                        number: "01",
-                                        title: "DEEPER STOCKFISH ANALYSIS WITH RICHER GAME STATS AND GRAPHS"
-                                    },
-                                    {
-                                        number: "02",
-                                        title: "AN INTERACTIVE \"COACH\" CHATBOT YOU CAN ASK THINGS LIKE: \"WHY IS MOVE 17 A BLUNDER?\" OR \"WHAT WAS MY BIGGEST MISTAKE IN THIS GAME?\""
-                                    },
-                                ].map((item) => (
-                                    <Box
-                                        key={item.number}
-                                        borderRadius="10px 10px 0 0"
-                                        border="2px solid rgba(255,255,255,0.2)"
-                                        overflow="hidden"
-                                        bg="linear-gradient(331.39deg, rgba(0,0,0,0) -1.53%, rgba(255,255,255,0.1) 81.73%)"
-                                        py={8}
-                                        px={6}
-                                        textAlign="left"
-                                        transition="all 0.3s"
-                                        _hover={{ transform: "translateY(-4px)" }}
-                                    >
-                                        <Flex gap={6} align="start">
-                                            <Text 
-                                                fontSize="xl" 
-                                                fontWeight="bold" 
-                                               color={"white"}
-                                                minW="40px"
-                                                opacity="0.7"
-                                            >
-                                                {item.number}
-                                            </Text>
-                                            <Text 
-                                                fontSize="md" 
-                                                fontWeight="semibold" 
-                                                lineHeight="short" 
-                                                fontFamily="'Clash Display', sans-serif"
-                                                opacity="0.8"
-                                                color={"white"}
-                                            >
-                                                {item.title}
-                                            </Text>
-                                        </Flex>
-                                    </Box>
-                                ))}
-                            </Box>
-                        </Box>
-
-                        
-                    </Box>
-                </Container>
-            </Box>
-            <Container maxW="container.xl" px={{ base: 4, md: 8 }} zIndex="1" my={8}>
+<Container maxW="container.xl" px={{ base: 4, md: 8 }} zIndex="1" my={8}>
 
 
                 <ChessAnalysis correctMoves={formData.correctMoves} />
 
             </Container>
+
+
+                    </Box>
+                </Container>
+            </Box>
+            
             <ImagePreviewModal
                 isImageModalOpen={isImageModalOpen}
                 setIsImageModalOpen={setIsImageModalOpen}

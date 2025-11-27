@@ -18,7 +18,7 @@ import {
     Tabs,
 } from "@chakra-ui/react";
 
-import { MdDelete, MdOutlineArrowOutward } from "react-icons/md";
+import { MdDelete, MdOutlineArrowOutward, MdShare } from "react-icons/md";
 
 import { useNavigate } from "react-router-dom";
 import { BASE_URL } from "../utils/service";
@@ -30,12 +30,16 @@ import whitegradient from "../assets/whitebg.png";
 import whitegradient1 from "../assets/whitebg1.png";
 
 import ConfirmDeleteButton from "../components/DeleteConfirmation";
+import ShareGameModal from "../components/ShareGame";
+
 
 const Library = () => {
     const [games, setGames] = useState([]);
     const [positions, setPositions] = useState([]);
     const [loading, setLoading] = useState(false);
     const [loadingId, setLoadingId] = useState("");
+    const [isShareGameModal, setIsShareGameModal] = useState(false);
+    const [sharePayload, setSharePayload] = useState({ type: "game", id: null });
     const navigate = useNavigate();
 
     const fetchGames = async () => {
@@ -92,7 +96,11 @@ const Library = () => {
 
     const handleViewPosition = (fen, posID) => {
         navigate(`/view-position?fen=${encodeURIComponent(fen)}&posID=${encodeURIComponent(posID)}`);
+    };
 
+    const handleShare = (id, type) => {
+        setSharePayload({ type, id });
+        setIsShareGameModal(true);
     };
 
     const handleDelete = async (id, type = "game") => {
@@ -104,9 +112,7 @@ const Library = () => {
                 type === "game"
                     ? `${BASE_URL}/api/Game/DeleteGame`
                     : `${BASE_URL}/api/Position/DeletePosition`;
-            let payload = type === "game" ? { gameId: id } : {
-                "positionID": id
-            }
+            let payload = type === "game" ? { gameId: id } : { "positionID": id };
 
             await axios.post(endpoint, payload, { headers: { Authorization: `Bearer ${token}` } });
 
@@ -137,7 +143,8 @@ const Library = () => {
         const savedTime = item?.timeSaved
             ? new Date(item.timeSaved).toLocaleString()
             : "Unknown";
-        let metadata = JSON.parse(item.metadata)
+        let metadata = JSON.parse(item.metadata);
+
         return (
             <Box
                 key={item.gameId || item.positionId}
@@ -198,7 +205,7 @@ const Library = () => {
                         >
                             View
                         </Button>
-                        <Box
+                        {/* <Box
                             as="button"
                             bg="#D32C32"
                             color="white"
@@ -217,37 +224,38 @@ const Library = () => {
                             _hover={{ bg: "#b92027" }}
                         >
                             <MdOutlineArrowOutward style={{ fontSize: "12px" }} />
-                        </Box>
+                        </Box> */}
                     </Flex>
 
                     <HStack spacing={2}>
-                        <ConfirmDeleteButton
+                         <ConfirmDeleteButton
                             type="game"
                             isLoading={loadingId === item.gameId}
                             onConfirm={() => handleDelete(item.gameId, "game")}
                         />
-                        {/* <IconButton
+                        <IconButton
                             bg="#D32C32"
                             color="white"
                             width={["100%", "100px"]}
                             borderRadius="10px"
                             border="1px solid"
-                            borderColor="linear-gradient(265.38deg, rgba(255,255,255,0.6) 24.8%, rgba(255,255,255,0.3) 85.32%)"
                             display="flex"
                             alignItems="center"
                             justifyContent="space-between"
                             p={4}
-                            onClick={() => handleDelete(item.gameId || item.positionId, type)}
+                            onClick={() => handleShare(item.gameId, "game")}
+                            
                         >
-                            Delete {loadingId === (item.gameId || item.positionId) ? <Spinner size="sm" /> : <MdDelete />}
-                        </IconButton> */}
+                           Share <MdShare />
+                        </IconButton>
+                       
                     </HStack>
                 </HStack>
             </Box>
         );
     };
-    const PositionCard = (position) => {
 
+    const PositionCard = (position) => {
         const imageUrl =
             position?.imageUrl ||
             `https://www.chess.com/dynboard?fen=${encodeURIComponent(position.fen)}&size=2`;
@@ -311,7 +319,7 @@ const Library = () => {
                         >
                             View
                         </Button>
-                        <Box
+                        {/* <Box
                             as="button"
                             bg="#D32C32"
                             color="white"
@@ -326,27 +334,32 @@ const Library = () => {
                             _hover={{ bg: "#b92027" }}
                         >
                             <MdOutlineArrowOutward style={{ fontSize: "12px" }} />
-                        </Box>
+                        </Box> */}
                     </Flex>
-                    <ConfirmDeleteButton
-                        type="position"
-                        isLoading={loadingId === position.posID}
-                        onConfirm={() => handleDelete(position.posID, "position")}
-                    />
-                    {/* <IconButton
-                        bg="#D32C32"
-                        color="white"
-                        width={["100%", "100px"]}
-                        borderRadius="10px"
-                        border="1px solid"
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="space-between"
-                        p={4}
-                        onClick={() => handleDelete(position.posID, "position")}
-                    >
-                        Delete {loadingId === position.posID ? <Spinner size="sm" /> : <MdDelete />}
-                    </IconButton> */}
+
+                    <HStack spacing={2}>
+                        <ConfirmDeleteButton
+                            type="position"
+                            isLoading={loadingId === position.posID}
+                            onConfirm={() => handleDelete(position.posID, "position")}
+                        />
+                        <IconButton
+                            bg="#D32C32"
+                            color="white"
+                            width={["100%", "100px"]}
+                            borderRadius="10px"
+                            border="1px solid"
+                            display="flex"
+                            alignItems="center"
+                            justifyContent="space-between"
+                            p={4}
+                            onClick={() => handleShare(position.posID, "position")}
+                           
+                        >
+                           Share <MdShare />
+                        </IconButton>
+                        
+                    </HStack>
                 </HStack>
             </Box>
         );
@@ -360,7 +373,6 @@ const Library = () => {
                     { src: gradient1, left: "-20%", top: "-75%" },
                     { src: whitegradient1, right: "-20%", top: "-130%" },
                     { src: whitegradient, left: "-20%", top: "-130%" },
-
                 ].map((bg, i) => (
                     <Box
                         key={i}
@@ -373,7 +385,6 @@ const Library = () => {
                         <Image src={bg.src} alt="bg" w="100%" h="100%" objectFit="contain" />
                     </Box>
                 ))}
-
 
                 <Box
                     position="absolute"
@@ -409,57 +420,57 @@ const Library = () => {
                     </Heading>
                 </Container>
             </Box>
-<Box
-                    position="absolute"
-                    top="40%"
-                    left="15%"
-                    width="300px"
-                    height="300px"
-                    bg="red"
-                    borderRadius="full"
-                    filter="blur(100px)"
-                    opacity="0.3"
-                    zIndex="0"
-                />
-                <Box
-                    position="absolute"
-                    top="40%"
-                    right="15%"
-                    width="350px"
-                    height="350px"
-                    bg="red"
-                    borderRadius="full"
-                    filter="blur(110px)"
-                    opacity="0.2"
-                    zIndex="0"
-                />
-                <Box
-                    position="absolute"
-                    top="45%"
-                    right="40%"
-                    width="350px"
-                    height="350px"
-                    bg="red"
-                    borderRadius="full"
-                    filter="blur(110px)"
-                    opacity="0.2"
-                    zIndex="0"
-                />
+
+            <Box
+                position="absolute"
+                top="40%"
+                left="15%"
+                width="300px"
+                height="300px"
+                bg="red"
+                borderRadius="full"
+                filter="blur(100px)"
+                opacity="0.3"
+                zIndex="0"
+            />
+            <Box
+                position="absolute"
+                top="40%"
+                right="15%"
+                width="350px"
+                height="350px"
+                bg="red"
+                borderRadius="full"
+                filter="blur(110px)"
+                opacity="0.2"
+                zIndex="0"
+            />
+            <Box
+                position="absolute"
+                top="45%"
+                right="40%"
+                width="350px"
+                height="350px"
+                bg="red"
+                borderRadius="full"
+                filter="blur(110px)"
+                opacity="0.2"
+                zIndex="0"
+            />
+
             <Container maxW="container.xl" px={{ base: 4, md: 8 }} py={8}>
-                <VStack align={"start"} mb={8}> <Heading fontSize={{ base: "2xl", sm: "4xl", md: "5xl", lg: "5xl" }} fontFamily="'Clash Display', sans-serif" color="black" fontWeight="600" > Library </Heading> <Text>All your analyzed games and </Text> <Text>saved positions — organized and easy to explore.</Text> </VStack>
+                <VStack align={"start"} mb={8}>
+                    <Heading fontSize={{ base: "2xl", sm: "4xl", md: "5xl", lg: "5xl" }} fontFamily="'Clash Display', sans-serif" color="black" fontWeight="600">
+                        Library
+                    </Heading>
+                    <Text>Save and finish more games here – your Library powers the personalized gameplay stats and insights that are coming soon to your Profile</Text>
+                </VStack>
 
                 <Tabs.Root defaultValue="games">
                     <Tabs.List>
-                        <Tabs.Trigger value="games">
-                            {/* <LuFolder /> */}
-                            Games
-                        </Tabs.Trigger>
-                        <Tabs.Trigger value="positions">
-                            {/* <RiLayoutGridFill /> */}
-                            Positions
-                        </Tabs.Trigger>
+                        <Tabs.Trigger value="games">Games</Tabs.Trigger>
+                        <Tabs.Trigger value="positions">Positions</Tabs.Trigger>
                     </Tabs.List>
-
 
                     <Tabs.Content value="games">
                         {loading ? (
@@ -491,8 +502,8 @@ const Library = () => {
                                                 <SkeletonCircle size="8" />
                                             </HStack>
                                             <HStack spacing={2}>
-                                                <Skeleton height="35px" width="90px" borderRadius="10px" />
-                                                <Skeleton height="35px" width="90px" borderRadius="10px" />
+                                                <Skeleton height="35px" width="40px" borderRadius="md" />
+                                                <Skeleton height="35px" width="40px" borderRadius="md" />
                                             </HStack>
                                         </HStack>
                                     </Box>
@@ -511,10 +522,8 @@ const Library = () => {
                         )}
                     </Tabs.Content>
 
-
                     <Tabs.Content value="positions">
                         {loading ? (
-
                             <SimpleGrid columns={{ base: 1, sm: 1, md: 3 }} gap={8}>
                                 {[...Array(6)].map((_, i) => (
                                     <Box
@@ -543,8 +552,8 @@ const Library = () => {
                                                 <SkeletonCircle size="8" />
                                             </HStack>
                                             <HStack spacing={2}>
-                                                <Skeleton height="35px" width="90px" borderRadius="10px" />
-                                                <Skeleton height="35px" width="90px" borderRadius="10px" />
+                                                <Skeleton height="35px" width="40px" borderRadius="md" />
+                                                <Skeleton height="35px" width="40px" borderRadius="md" />
                                             </HStack>
                                         </HStack>
                                     </Box>
@@ -557,16 +566,21 @@ const Library = () => {
                                 </Text>
                             </Flex>
                         ) : (
-
                             <SimpleGrid columns={{ base: 1, sm: 1, md: 3 }} gap={8}>
-
                                 {positions.map((pos) => PositionCard(pos))}
                             </SimpleGrid>
                         )}
                     </Tabs.Content>
-
                 </Tabs.Root>
             </Container>
+
+            {/* Share Modal */}
+            <ShareGameModal
+                isOpen={isShareGameModal}
+                onClose={() => setIsShareGameModal(false)}
+                type={sharePayload.type}
+                payload={{ gameId: sharePayload.id }}
+            />
         </>
     );
 };
