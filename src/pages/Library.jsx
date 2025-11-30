@@ -42,7 +42,7 @@ const Library = () => {
     const [isShareGameModal, setIsShareGameModal] = useState(false);
     const [sharePayload, setSharePayload] = useState({ type: "game", id: null });
 
-  
+
     const [selectedGames, setSelectedGames] = useState([]);
     const [selectedPositions, setSelectedPositions] = useState([]);
     const [isShareBatchModal, setIsShareBatchModal] = useState(false);
@@ -99,11 +99,18 @@ const Library = () => {
     }, []);
 
     const handleViewGame = (gameId) => {
-        navigate(`/analyze/${encodeURIComponent(gameId)}`);
+        // navigate(`/analyze/${encodeURIComponent(gameId)}`);
+        const url = `/analyze/${encodeURIComponent(gameId)}`;
+        window.open(url, "_blank");
     };
 
     const handleViewPosition = (fen, posID) => {
-        navigate(`/view-position?fen=${encodeURIComponent(fen)}&posID=${encodeURIComponent(posID)}`);
+        // navigate(`/view-position?fen=${encodeURIComponent(fen)}&posID=${encodeURIComponent(posID)}`);
+        window.open(
+  `/view-position?fen=${encodeURIComponent(fen)}&posID=${encodeURIComponent(posID)}`,
+  "_blank",
+  "noopener,noreferrer"
+);
     };
 
     const handleShare = (id, type) => {
@@ -149,7 +156,7 @@ const Library = () => {
         }
     };
 
- 
+
     const handleSelectGame = (gameId, isChecked) => {
         if (isChecked) {
             setSelectedGames((prev) => [...prev, gameId]);
@@ -528,7 +535,7 @@ const Library = () => {
             />
 
             <Container maxW="container.xl" px={{ base: 4, md: 8 }} py={8}>
-               
+
                 {selectedCount > 0 && (
                     <Flex
                         bg="#D32C32"
@@ -575,13 +582,13 @@ const Library = () => {
                     </Tabs.List>
 
                     <Tabs.Content value="games">
-                        
+
                         {games.length > 0 && (
                             <Flex justify="space-between" align="center" mb={4} mt={4}>
                                 <Checkbox.Root
                                     checked={selectedGames.length === games.length && games.length > 0}
                                     onCheckedChange={(e) => handleSelectAllGames(e.checked)}
-                                    
+
                                 >
                                     <Checkbox.HiddenInput />
                                     <Checkbox.Control />
@@ -644,13 +651,13 @@ const Library = () => {
                     </Tabs.Content>
 
                     <Tabs.Content value="positions">
-                   
+
                         {positions.length > 0 && (
                             <Flex justify="space-between" align="center" mb={4} mt={4}>
                                 <Checkbox.Root
                                     checked={selectedPositions.length === positions.length && positions.length > 0}
                                     onCheckedChange={(e) => handleSelectAllPositions(e.checked)}
-                                    
+
                                 >
                                     <Checkbox.HiddenInput />
                                     <Checkbox.Control />
@@ -714,7 +721,7 @@ const Library = () => {
                 </Tabs.Root>
             </Container>
 
-        
+
             <ShareGameModal
                 isOpen={isShareGameModal}
                 onClose={() => setIsShareGameModal(false)}
@@ -722,7 +729,7 @@ const Library = () => {
                 payload={{ gameId: sharePayload.id }}
             />
 
-           
+
             <ShareBatchModal
                 isOpen={isShareBatchModal}
                 onClose={() => setIsShareBatchModal(false)}
