@@ -199,7 +199,7 @@ export default function HomeNew({ isEdit }) {
                     });
 
                     setFormData({
-                        correctMoves: parsedCorrectMoves || "",
+                        correctMoves: parsedCorrectMoves.join("\n") || "",
                         remainingMoves: parsedRemainingMoves || "",
                         suggestedMoves: "",
                         error: "",
@@ -226,10 +226,12 @@ export default function HomeNew({ isEdit }) {
                     setAnalyzedImages(moveImageUrls)
                     setPreviewUrls(gameImageUrls || []);
 
+
                 } catch (err) {
                     console.error("❌ Failed to load game:", err);
                 } finally {
                     setLoading(false);
+
                 }
             };
 
@@ -413,8 +415,14 @@ export default function HomeNew({ isEdit }) {
     const flexDirection = useBreakpointValue({ base: "column", lg: "row" });
     const handleFileChange = (e) => {
         const files = Array.from(e.target.files);
-        setSelectedFiles(files);
-        setPreviewUrls(files.map((file) => URL.createObjectURL(file)));
+        if (files.length > 2) {
+            alert("Please select up to 2 images only.");
+        } else {
+            setSelectedFiles(files);
+            setPreviewUrls(files.map((file) => URL.createObjectURL(file)));
+
+        }
+
     };
 
     const uploadImages = () => {
@@ -688,6 +696,9 @@ export default function HomeNew({ isEdit }) {
 
     return (
         <>
+            <Box bg="#D32C32">
+                <Text textAlign="center" fontSize="md" py="2" color="white" fontWeight="500" w={"100%"}>Play smarter. Learn faster. Analyze for FREE! 🚀</Text>
+            </Box>
             <GradientBg>
 
 
@@ -849,10 +860,18 @@ export default function HomeNew({ isEdit }) {
                                         p={4}
                                         disabled={isEdit}
                                     >
-                                        Upload Image
-                                        <Box bg="black" p={1} borderRadius="full" border="1px solid white">
-                                            <IoMdArrowRoundForward />
-                                        </Box>
+                                        {selectedFiles?.length === 0 ? <>
+                                            Upload Image
+                                            <Box bg="black" p={1} borderRadius="full" border="1px solid white">
+                                                <IoMdArrowRoundForward />
+                                            </Box>
+                                        </> : <>
+                                            {selectedFiles?.length}/2 Images Selected
+                                            <Box bg="black" p={1} borderRadius="full" border="1px solid white">
+                                                <IoMdArrowRoundForward />
+                                            </Box>
+                                        </>}
+
                                     </Button>
 
                                     <Button
@@ -904,6 +923,8 @@ export default function HomeNew({ isEdit }) {
                                         borderRadius={"14.82px"}
                                         border={"1px solid"}
                                         width={["100%", "200px"]}
+                                        disabled={selectedFiles?.length === 0}
+
 
                                         borderColor={"linear-gradient(265.38deg, rgba(255, 255, 255, 0.6) 24.8%, rgba(255, 255, 255, 0.3) 85.32%)"}
                                     >
@@ -1157,7 +1178,7 @@ export default function HomeNew({ isEdit }) {
 
                                     {isEdit && (
                                         <HStack spacing={4} width="100%">
-                                            <Button
+                                            {/* <Button
                                                 bg="#D32C32"
                                                 color="white"
                                                 height="45px"
@@ -1168,7 +1189,7 @@ export default function HomeNew({ isEdit }) {
                                                 borderColor={"linear-gradient(265.38deg, rgba(255, 255, 255, 0.6) 24.8%, rgba(255, 255, 255, 0.3) 85.32%)"}
                                             >
                                                 Share Position <Box bg={"black"} p={1} borderRadius={"full"} border={"1px solid white"}> <IoMdArrowRoundForward /></Box>
-                                            </Button>
+                                            </Button> */}
                                             <Button
                                                 bg="#D32C32"
                                                 color="white"
@@ -1236,7 +1257,7 @@ export default function HomeNew({ isEdit }) {
                             gap={8}
                             mb={12}
                         >
-                            
+
 
                             {/* RIGHT COLUMN */}
                             <Box>
@@ -1315,13 +1336,13 @@ export default function HomeNew({ isEdit }) {
                                     <Box
                                         key={item.number}
                                         p={8}
-                                borderRadius="xl"
-                                bg={"gray.50"}
-                                border="1px solid"
-                                borderColor={"#18181b1a"}
-                                _hover={{ shadow: "lg", transform: "translateY(-3px)" }}
-                                transition="0.2s"
-                                boxShadow={"0px 16px 24px #18181b1a"}
+                                        borderRadius="xl"
+                                        bg={"gray.50"}
+                                        border="1px solid"
+                                        borderColor={"#18181b1a"}
+                                        _hover={{ shadow: "lg", transform: "translateY(-3px)" }}
+                                        transition="0.2s"
+                                        boxShadow={"0px 16px 24px #18181b1a"}
                                     >
                                         <Flex gap={6} align="start">
                                             <Text
@@ -1347,18 +1368,18 @@ export default function HomeNew({ isEdit }) {
                             </Box>
                         </Box>
 
-<Container maxW="container.xl" px={{ base: 4, md: 8 }} zIndex="1" my={8}>
+                        <Container maxW="container.xl" px={{ base: 4, md: 8 }} zIndex="1" my={8}>
 
 
-                <ChessAnalysis correctMoves={formData.correctMoves} />
+                            <ChessAnalysis correctMoves={formData.correctMoves} />
 
-            </Container>
+                        </Container>
 
 
                     </Box>
                 </Container>
             </Box>
-            
+
             <ImagePreviewModal
                 isImageModalOpen={isImageModalOpen}
                 setIsImageModalOpen={setIsImageModalOpen}

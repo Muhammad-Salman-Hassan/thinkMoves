@@ -14,11 +14,12 @@ import {
     Flex,
     Skeleton,
     SkeletonCircle,
-    Spinner,
     Tabs,
+    Checkbox,
 } from "@chakra-ui/react";
 
-import { MdDelete, MdOutlineArrowOutward, MdShare } from "react-icons/md";
+import { MdShare } from "react-icons/md";
+import { FaShareAlt } from "react-icons/fa";
 
 import { useNavigate } from "react-router-dom";
 import { BASE_URL } from "../utils/service";
@@ -31,7 +32,7 @@ import whitegradient1 from "../assets/whitebg1.png";
 
 import ConfirmDeleteButton from "../components/DeleteConfirmation";
 import ShareGameModal from "../components/ShareGame";
-
+import ShareBatchModal from "../components/ShareBatchModal";
 
 const Library = () => {
     const [games, setGames] = useState([]);
@@ -40,6 +41,13 @@ const Library = () => {
     const [loadingId, setLoadingId] = useState("");
     const [isShareGameModal, setIsShareGameModal] = useState(false);
     const [sharePayload, setSharePayload] = useState({ type: "game", id: null });
+
+  
+    const [selectedGames, setSelectedGames] = useState([]);
+    const [selectedPositions, setSelectedPositions] = useState([]);
+    const [isShareBatchModal, setIsShareBatchModal] = useState(false);
+    const [activeTab, setActiveTab] = useState("games");
+
     const navigate = useNavigate();
 
     const fetchGames = async () => {
@@ -116,8 +124,13 @@ const Library = () => {
 
             await axios.post(endpoint, payload, { headers: { Authorization: `Bearer ${token}` } });
 
-            if (type === "game") setGames((prev) => prev.filter((g) => g.gameId !== id));
-            else setPositions((prev) => prev.filter((p) => p.posID !== id));
+            if (type === "game") {
+                setGames((prev) => prev.filter((g) => g.gameId !== id));
+                setSelectedGames((prev) => prev.filter((gId) => gId !== id));
+            } else {
+                setPositions((prev) => prev.filter((p) => p.posID !== id));
+                setSelectedPositions((prev) => prev.filter((pId) => pId !== id));
+            }
 
             toaster.create({
                 title: `${type === "game" ? "Game" : "Position"} Deleted`,
@@ -136,6 +149,60 @@ const Library = () => {
         }
     };
 
+ 
+    const handleSelectGame = (gameId, isChecked) => {
+        if (isChecked) {
+            setSelectedGames((prev) => [...prev, gameId]);
+        } else {
+            setSelectedGames((prev) => prev.filter((id) => id !== gameId));
+        }
+    };
+
+    const handleSelectPosition = (posID, isChecked) => {
+        if (isChecked) {
+            setSelectedPositions((prev) => [...prev, posID]);
+        } else {
+            setSelectedPositions((prev) => prev.filter((id) => id !== posID));
+        }
+    };
+
+    const handleSelectAllGames = (isChecked) => {
+        if (isChecked) {
+            setSelectedGames(games.map((g) => g.gameId));
+        } else {
+            setSelectedGames([]);
+        }
+    };
+
+    const handleSelectAllPositions = (isChecked) => {
+        if (isChecked) {
+            setSelectedPositions(positions.map((p) => p.posID));
+        } else {
+            setSelectedPositions([]);
+        }
+    };
+
+    const handleOpenBatchShare = () => {
+        const itemsToShare = activeTab === "games" ? selectedGames : selectedPositions;
+        if (itemsToShare.length === 0) {
+            toaster.create({
+                title: "No items selected",
+                description: `Please select at least one ${activeTab === "games" ? "game" : "position"} to share`,
+                type: "warning",
+            });
+            return;
+        }
+        setIsShareBatchModal(true);
+    };
+
+    const handleClearSelection = () => {
+        if (activeTab === "games") {
+            setSelectedGames([]);
+        } else {
+            setSelectedPositions([]);
+        }
+    };
+
     const renderCard = (item, type = "game") => {
         const imageUrl =
             item?.gameImageUrls?.[0] || item?.imageUrl || "https://placehold.co/600x400";
@@ -144,6 +211,7 @@ const Library = () => {
             ? new Date(item.timeSaved).toLocaleString()
             : "Unknown";
         let metadata = JSON.parse(item.metadata);
+        const isSelected = selectedGames.includes(item.gameId);
 
         return (
             <Box
@@ -159,7 +227,26 @@ const Library = () => {
                 }}
                 display="flex"
                 flexDir="column"
+                position="relative"
+                border={isSelected ? "2px solid #D32C32" : "2px solid transparent"}
             >
+                <Flex justifyContent={"flex-end"}>
+                    <Checkbox.Root
+                        checked={isSelected}
+                        onCheckedChange={(e) => handleSelectGame(item.gameId, e.checked)}
+                        size="lg"
+                        // 
+                        bg="white"
+                        borderRadius="md"
+                        variant={"solid"}
+                        p={1}
+                    >
+
+                        <Checkbox.HiddenInput />
+                        <Checkbox.Control />
+                    </Checkbox.Root>
+                </Flex>
+
                 <Box h="220px" w="100%" overflow="hidden" padding={2} borderRadius="lg">
                     <Image
                         src={imageUrl}
@@ -205,30 +292,10 @@ const Library = () => {
                         >
                             View
                         </Button>
-                        {/* <Box
-                            as="button"
-                            bg="#D32C32"
-                            color="white"
-                            borderRadius="full"
-                            w="25px"
-                            h="25px"
-                            display="flex"
-                            alignItems="center"
-                            justifyContent="center"
-                            cursor="pointer"
-                            onClick={() =>
-                                type === "game"
-                                    ? handleViewGame(item.gameId)
-                                    : handleViewPosition(item.fen, item.posID)
-                            }
-                            _hover={{ bg: "#b92027" }}
-                        >
-                            <MdOutlineArrowOutward style={{ fontSize: "12px" }} />
-                        </Box> */}
                     </Flex>
 
                     <HStack spacing={2}>
-                         <ConfirmDeleteButton
+                        <ConfirmDeleteButton
                             type="game"
                             isLoading={loadingId === item.gameId}
                             onConfirm={() => handleDelete(item.gameId, "game")}
@@ -244,11 +311,9 @@ const Library = () => {
                             justifyContent="space-between"
                             p={4}
                             onClick={() => handleShare(item.gameId, "game")}
-                            
                         >
-                           Share <MdShare />
+                            Share <MdShare />
                         </IconButton>
-                       
                     </HStack>
                 </HStack>
             </Box>
@@ -263,6 +328,7 @@ const Library = () => {
         const savedTime = position?.createdTime
             ? new Date(position.createdTime).toLocaleString()
             : "Unknown";
+        const isSelected = selectedPositions.includes(position.posID);
 
         return (
             <Box
@@ -277,7 +343,24 @@ const Library = () => {
                 }}
                 display="flex"
                 flexDir="column"
+                position="relative"
+                border={isSelected ? "2px solid #D32C32" : "2px solid transparent"}
             >
+                <Flex justifyContent={"flex-end"}>
+                    <Checkbox.Root
+                        checked={isSelected}
+                        onCheckedChange={(e) => handleSelectPosition(position.posID, e.checked)}
+                        size="lg"
+                        // 
+                        bg="white"
+                        borderRadius="md"
+                        p={1}
+                    >
+                        <Checkbox.HiddenInput />
+                        <Checkbox.Control />
+                    </Checkbox.Root>
+                </Flex>
+
                 <Box h="220px" w="100%" overflow="hidden" padding={2} borderRadius="lg">
                     <Image
                         src={imageUrl}
@@ -319,22 +402,6 @@ const Library = () => {
                         >
                             View
                         </Button>
-                        {/* <Box
-                            as="button"
-                            bg="#D32C32"
-                            color="white"
-                            borderRadius="full"
-                            w="25px"
-                            h="25px"
-                            display="flex"
-                            alignItems="center"
-                            justifyContent="center"
-                            cursor="pointer"
-                            onClick={() => handleViewPosition(position.fen, position.posID)}
-                            _hover={{ bg: "#b92027" }}
-                        >
-                            <MdOutlineArrowOutward style={{ fontSize: "12px" }} />
-                        </Box> */}
                     </Flex>
 
                     <HStack spacing={2}>
@@ -354,16 +421,17 @@ const Library = () => {
                             justifyContent="space-between"
                             p={4}
                             onClick={() => handleShare(position.posID, "position")}
-                           
                         >
-                           Share <MdShare />
+                            Share <MdShare />
                         </IconButton>
-                        
                     </HStack>
                 </HStack>
             </Box>
         );
     };
+
+    const selectedCount = activeTab === "games" ? selectedGames.length : selectedPositions.length;
+    const totalCount = activeTab === "games" ? games.length : positions.length;
 
     return (
         <>
@@ -418,6 +486,7 @@ const Library = () => {
                     >
                         Your Library
                     </Heading>
+                    <Text textAlign={"center"}>Save and finish more games here – your Library powers the personalized gameplay stats and insights that are coming soon to your Profile</Text>
                 </Container>
             </Box>
 
@@ -459,20 +528,72 @@ const Library = () => {
             />
 
             <Container maxW="container.xl" px={{ base: 4, md: 8 }} py={8}>
-                <VStack align={"start"} mb={8}>
-                    <Heading fontSize={{ base: "2xl", sm: "4xl", md: "5xl", lg: "5xl" }} fontFamily="'Clash Display', sans-serif" color="black" fontWeight="600">
-                        Library
-                    </Heading>
-                    <Text>Save and finish more games here – your Library powers the personalized gameplay stats and insights that are coming soon to your Profile</Text>
-                </VStack>
+               
+                {selectedCount > 0 && (
+                    <Flex
+                        bg="#D32C32"
+                        color="white"
+                        p={4}
+                        borderRadius="lg"
+                        mb={4}
+                        justify="space-between"
+                        align="center"
+                        boxShadow="lg"
+                        wrap={"wrap"}
+                    >
+                        <HStack spacing={4}>
+                            <Text fontWeight="200">
+                                {selectedCount} {activeTab === "games" ? "game" : "position"}{selectedCount > 1 ? "s" : ""} selected
+                            </Text>
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                color="white"
+                                borderColor="white"
+                                _hover={{ bg: "whiteAlpha.200" }}
+                                onClick={handleClearSelection}
+                            >
+                                Clear Selection
+                            </Button>
+                        </HStack>
+                        <Button
+                            bg="white"
+                            color="#D32C32"
+                            _hover={{ bg: "gray.100" }}
+                            leftIcon={<FaShareAlt />}
+                            onClick={handleOpenBatchShare}
+                        >
+                            Share Selected
+                        </Button>
+                    </Flex>
+                )}
 
-                <Tabs.Root defaultValue="games">
+                <Tabs.Root defaultValue="games" onValueChange={(e) => setActiveTab(e.value)}>
                     <Tabs.List>
                         <Tabs.Trigger value="games">Games</Tabs.Trigger>
                         <Tabs.Trigger value="positions">Positions</Tabs.Trigger>
                     </Tabs.List>
 
                     <Tabs.Content value="games">
+                        
+                        {games.length > 0 && (
+                            <Flex justify="space-between" align="center" mb={4} mt={4}>
+                                <Checkbox.Root
+                                    checked={selectedGames.length === games.length && games.length > 0}
+                                    onCheckedChange={(e) => handleSelectAllGames(e.checked)}
+                                    
+                                >
+                                    <Checkbox.HiddenInput />
+                                    <Checkbox.Control />
+                                    <Checkbox.Label>
+                                        <Text fontWeight="500">
+                                            Select All ({games.length})
+                                        </Text>
+                                    </Checkbox.Label>
+                                </Checkbox.Root>
+                            </Flex>
+                        )}
+
                         {loading ? (
                             <SimpleGrid columns={{ base: 1, sm: 1, md: 3 }} gap={8}>
                                 {[...Array(6)].map((_, i) => (
@@ -523,6 +644,25 @@ const Library = () => {
                     </Tabs.Content>
 
                     <Tabs.Content value="positions">
+                   
+                        {positions.length > 0 && (
+                            <Flex justify="space-between" align="center" mb={4} mt={4}>
+                                <Checkbox.Root
+                                    checked={selectedPositions.length === positions.length && positions.length > 0}
+                                    onCheckedChange={(e) => handleSelectAllPositions(e.checked)}
+                                    
+                                >
+                                    <Checkbox.HiddenInput />
+                                    <Checkbox.Control />
+                                    <Checkbox.Label>
+                                        <Text fontWeight="500">
+                                            Select All ({positions.length})
+                                        </Text>
+                                    </Checkbox.Label>
+                                </Checkbox.Root>
+                            </Flex>
+                        )}
+
                         {loading ? (
                             <SimpleGrid columns={{ base: 1, sm: 1, md: 3 }} gap={8}>
                                 {[...Array(6)].map((_, i) => (
@@ -574,12 +714,27 @@ const Library = () => {
                 </Tabs.Root>
             </Container>
 
-            {/* Share Modal */}
+        
             <ShareGameModal
                 isOpen={isShareGameModal}
                 onClose={() => setIsShareGameModal(false)}
                 type={sharePayload.type}
                 payload={{ gameId: sharePayload.id }}
+            />
+
+           
+            <ShareBatchModal
+                isOpen={isShareBatchModal}
+                onClose={() => setIsShareBatchModal(false)}
+                selectedItems={activeTab === "games" ? selectedGames : selectedPositions}
+                type={activeTab === "games" ? "game" : "position"}
+                onSuccess={() => {
+                    if (activeTab === "games") {
+                        setSelectedGames([]);
+                    } else {
+                        setSelectedPositions([]);
+                    }
+                }}
             />
         </>
     );

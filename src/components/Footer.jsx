@@ -163,15 +163,11 @@ export default function Footer() {
                             <Heading size="sm" fontWeight="600" mb={2}>
                                 Contact Us
                             </Heading>
-                            <Text>(713) 266-6225</Text>
+                           
                             <Link href="mailto:info@thinkmoves.com" color="gray.300">
                                 info@thinkmoves.com
                             </Link>
-                            <Text>
-                                Houston
-
-                                TX
-                            </Text>
+                           
                         </VStack>
                     </Flex>
                 </Flex>

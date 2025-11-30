@@ -10,11 +10,16 @@ import {
     Drawer,
     Portal,
     useDisclosure,
+    Text,
+    
 } from "@chakra-ui/react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { FaArrowRight, FaBars } from "react-icons/fa";
+import { FaArrowRight, FaBars, FaDownload, FaChevronDown } from "react-icons/fa";
 import { Tooltip } from "./ToolTip";
 
+
+import sampleImage1 from "../assets/ThinkMovesBack.jpg";
+import sampleImage2 from "../assets/ThinkMovesFront.jpg";
 
 export default function Navbar() {
     const navigate = useNavigate();
@@ -23,71 +28,86 @@ export default function Navbar() {
     const location = useLocation();
     const currentPath = location.pathname;
 
-
-
     const handleLogout = () => {
         localStorage.clear();
         onClose();
         navigate("/");
     };
 
-  const NavLinks = () => {
-    const links = [
-        { name: "Home", to: "/", protected: false },
-        { name: "About", to: "/about-us", protected: false },
-        { name: "Library", to: "/library", protected: true },
-        { name: "Profile", to: "/profile", protected: true },
-    ];
 
-    return links.map(link => {
-        const isDisabled = link.protected && !token;
-        const isActive = currentPath === link.to;
-
-        const linkElement = (
-            <ChakraLink
-                as={isDisabled ? "span" : Link}
-                to={isDisabled ? undefined : link.to}
-                key={link.to}
-                color={
-                    isDisabled
-                        ? "gray.400"
-                        : isActive
-                        ? "#D32C32"
-                        : "gray.800"
-                }
-                cursor={isDisabled ? "not-allowed" : "pointer"}
-                fontWeight={isActive ? "700" : "500"}
-                opacity={isDisabled ? 0.6 : 1}
-                _hover={
-                    isDisabled
-                        ? { textDecoration: "none" }
-                        : { color: "#D32C32", textDecoration: "none" }
-                }
-                mx={4}
-                onClick={isDisabled ? undefined : onClose}
-            >
-                {link.name}
-            </ChakraLink>
-        );
-
-        if (!isDisabled) return linkElement;
-
-        return (
-            <Tooltip
-                key={link.to}
-                content="To access this page.You need to login first"
-                showArrow
-                placement="bottom"
-            >
-                {linkElement}
-            </Tooltip>
-        );
-    });
-};
+    const downloadImage = (imageUrl, fileName) => {
+        const link = document.createElement('a');
+        link.href = imageUrl;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
 
 
+    const downloadAllImages = () => {
+        downloadImage(sampleImage1, 'sample-image-1.jpg');
+        setTimeout(() => {
+            downloadImage(sampleImage2, 'sample-image-2.jpg');
+        }, 100);
+    };
+
+    const NavLinks = () => {
+        const links = [
+            { name: "Home", to: "/", protected: false },
+            { name: "About", to: "/about-us", protected: false },
+            { name: "Library", to: "/library", protected: true },
+            { name: "Profile", to: "/profile", protected: true },
+        ];
+
+        return links.map(link => {
+            const isDisabled = link.protected && !token;
+            const isActive = currentPath === link.to;
+
+            const linkElement = (
+                <ChakraLink
+                    as={isDisabled ? "span" : Link}
+                    to={isDisabled ? undefined : link.to}
+                    key={link.to}
+                    color={
+                        isDisabled
+                            ? "gray.400"
+                            : isActive
+                                ? "#D32C32"
+                                : "gray.800"
+                    }
+                    cursor={isDisabled ? "not-allowed" : "pointer"}
+                    fontWeight={isActive ? "700" : "500"}
+                    opacity={isDisabled ? 0.6 : 1}
+                    _hover={
+                        isDisabled
+                            ? { textDecoration: "none" }
+                            : { color: "#D32C32", textDecoration: "none" }
+                    }
+                    mx={4}
+                    onClick={isDisabled ? undefined : onClose}
+                >
+                    {link.name}
+                </ChakraLink>
+            );
+
+            if (!isDisabled) return linkElement;
+
+            return (
+                <Tooltip
+                    key={link.to}
+                    content="To access this page.You need to login first"
+                    showArrow
+                    placement="bottom"
+                >
+                    {linkElement}
+                </Tooltip>
+            );
+        });
+    };
 
     return (
+
         <Box
             as="nav"
             w="100%"
@@ -116,17 +136,26 @@ export default function Navbar() {
                         <HStack spacing={8}>
                             <NavLinks />
                         </HStack>
+                        <Button
 
-                        {token ? (<></>
-                            // <IconButton
-                            //     onClick={handleNavigate}
-                            //     bg={"transparent"}
-                            //     color={"black"}
-                            //     gap="10px"
-                            //     fontSize={"25px"}
-                            // >
-                            //     <RiProfileFill />
-                            // </IconButton>
+                            to="/login"
+                            bg="#D32C32"
+                            color="white"
+                            _hover={{ bg: "#b92027" }}
+                            borderRadius="14.82px"
+                            // px="16px"
+                            py="10px"
+                            rightIcon={<FaArrowRight />}
+                            border="1.65px solid #D32C32"
+                            // gap="10px"
+                            onClick={downloadAllImages}
+                        >
+                            Download Sample images
+                        </Button>
+
+
+                        {token ? (
+                            <></>
                         ) : (
                             <HStack spacing={4}>
                                 <Button
@@ -174,6 +203,29 @@ export default function Navbar() {
                             <Drawer.Body>
                                 <Flex direction="column" gap={4}>
                                     <NavLinks />
+
+                                    {/* Download Section in Mobile */}
+                                    <Box>
+                                        
+                                        <Flex direction="column" gap={2}>
+                                            
+                                            <Button
+                                                onClick={downloadAllImages}
+                                                bg="#D32C32"
+                                            color="white"
+                                            _hover={{ bg: "#b92027" }}
+                                            borderRadius="14.82px"
+                                            px="16px"
+                                            py="10px"
+                                            border="1.65px solid #D32C32"
+                                            gap="10px"
+                                                leftIcon={<FaDownload />}
+                                            >
+                                                Download Sample Images
+                                            </Button>
+                                        </Flex>
+                                    </Box>
+
                                     {token ? (
                                         <Button
                                             onClick={handleLogout}
@@ -229,5 +281,6 @@ export default function Navbar() {
                 </Portal>
             </Drawer.Root>
         </Box>
+
     );
 }
