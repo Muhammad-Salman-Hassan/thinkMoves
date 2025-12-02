@@ -11,7 +11,7 @@ import {
     Container,
     Image,
     Heading,
-    Textarea,
+    
     IconButton,
     useBreakpointValue,
     Field,
@@ -378,7 +378,7 @@ export default function HomeNew({ isEdit }) {
     };
 
     const moveToStart = () => {
-        // Go to first move (index 0)
+       
         if (moveHistory.length > 0) {
             chessGame.reset();
 
@@ -393,7 +393,7 @@ export default function HomeNew({ isEdit }) {
     };
 
     const moveToEnd = () => {
-        // Go to second-to-last move (length - 2)
+       
         if (moveHistory.length > 1) {
             chessGame.reset();
 
@@ -440,7 +440,7 @@ export default function HomeNew({ isEdit }) {
                     const now = Date.now();
                     const dayInMs = 24 * 60 * 60 * 1000;
 
-                    // Only restore if saved within last 7 days
+                    
                     if (now - state.timestamp < 7 * dayInMs) {
                         console.log('Restoring saved analysis state...');
                         setFormData(state.formData);
@@ -452,7 +452,7 @@ export default function HomeNew({ isEdit }) {
                         setCurrentMoveIndex(state.currentMoveIndex);
                         setChessPosition(state.chessPosition);
                     } else {
-                        // Clear old state
+                       
                         localStorage.removeItem('analysis-state');
                     }
                 }
@@ -466,10 +466,10 @@ export default function HomeNew({ isEdit }) {
         }
     }, [isEdit]);
 
-    // 🔥 NEW: Save state whenever critical data changes
+    
     useEffect(() => {
         const saveState = () => {
-            // Only save if we have actual analysis data
+          
             if (!isEdit && (formData.correctMoves || previewUrls.length > 0)) {
                 try {
                     localStorage.setItem('analysis-state', JSON.stringify({
@@ -490,7 +490,7 @@ export default function HomeNew({ isEdit }) {
             }
         };
 
-        // Debounce saves
+       
         const timeoutId = setTimeout(saveState, 1000);
         return () => clearTimeout(timeoutId);
     }, [formData, data, previewUrls, analyzedImages, fen, moveHistory, currentMoveIndex, chessPosition, isEdit]);
@@ -498,7 +498,7 @@ export default function HomeNew({ isEdit }) {
     const handleNewAnalysis = () => {
         try {
             localStorage.removeItem('analysis-state');
-            // Reset all state to initial values
+           
             setFormData({
                 correctMoves: "",
                 moveImages: [],
