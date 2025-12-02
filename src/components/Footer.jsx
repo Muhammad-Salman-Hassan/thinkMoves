@@ -90,7 +90,7 @@ export default function Footer() {
                         </Text>
 
                         <HStack spacing={4} pt={2}>
-                            <IconButton
+                            {/* <IconButton
                                 as="a"
                                 href="#"
                                 aria-label="Facebook"
@@ -101,10 +101,10 @@ export default function Footer() {
                                 _hover={{ bg: "#c10002" }}
                             >
                                 <FaFacebookF />
-                            </IconButton>
+                            </IconButton> */}
                             <IconButton
                                 as="a"
-                                href="#"
+                                href=" https://www.linkedin.com/company/thinkmoves/"
                                 aria-label="LinkedIn"
 
                                 bg="#1a1a1a86"
@@ -117,9 +117,9 @@ export default function Footer() {
                             </IconButton>
                             <IconButton
                                 as="a"
-                                href="#"
+                                href="https://www.instagram.com/thinkmoves?utm_source=qr&igsh=azJ1cTN1bW1qbDE3"
                                 aria-label="Instagram"
-
+                                
                                 bg="#1a1a1a86"
                                 color="white"
                                 borderRadius="full"

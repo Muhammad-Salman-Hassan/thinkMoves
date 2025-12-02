@@ -220,6 +220,7 @@ useEffect(() => {
                 isOpen={isPositionModalOpen}
                 onClose={() => setIsPositionModalOpen(false)}
                 payload={payload}
+                type="game"
             />
 
             <ShareGameModal

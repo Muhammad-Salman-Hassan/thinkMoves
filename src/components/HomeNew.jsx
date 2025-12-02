@@ -33,13 +33,12 @@ import { getMoveStyle, separateImages } from "../utils/DefaultFunctions";
 import SavePositionModal from "./SavePosition";
 import { InvokeCommand, LambdaClient } from "@aws-sdk/client-lambda";
 import ChessAnalysis from "./DeepAnalyse";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { LuSearch } from "react-icons/lu";
 import ShareGameModal from "./ShareGame";
 import { MdFirstPage, MdLastPage } from 'react-icons/md';
-import whitegradient from "../assets/whitebg.png";
-import gradient from "../assets/gradientbg.png";
+
 export default function HomeNew({ isEdit }) {
     const chessGameRef = useRef(new Chess());
     const chessGame = chessGameRef.current;
@@ -77,6 +76,9 @@ export default function HomeNew({ isEdit }) {
     const [data, setData] = useState({});
     const [imageModalType, setImageModalType] = useState("");
     const { id } = useParams();
+    const [searchParams] = useSearchParams();
+    const isLibraryView = searchParams.get("isLibraryView") === "true" ? true : false;
+
     const decodedGameID = decodeURIComponent(id);
     const { metadataImages, moveImages } = separateImages(data?.croppedImages, data?.metadata, data?.remainingPGN, data.correctMovesPGN);
     const openImageModal = (type) => {
@@ -429,6 +431,97 @@ export default function HomeNew({ isEdit }) {
         fileInputRef.current.click();
     };
 
+    useEffect(() => {
+        const loadSavedState = () => {
+            try {
+                const saved = localStorage.getItem('analysis-state');
+                if (saved && !isEdit) {
+                    const state = JSON.parse(saved);
+                    const now = Date.now();
+                    const dayInMs = 24 * 60 * 60 * 1000;
+
+                    // Only restore if saved within last 7 days
+                    if (now - state.timestamp < 7 * dayInMs) {
+                        console.log('Restoring saved analysis state...');
+                        setFormData(state.formData);
+                        setData(state.data);
+                        setPreviewUrls(state.previewUrls);
+                        setAnalyzedImages(state.analyzedImages);
+                        setFen(state.fen);
+                        setMoveHistory(state.moveHistory);
+                        setCurrentMoveIndex(state.currentMoveIndex);
+                        setChessPosition(state.chessPosition);
+                    } else {
+                        // Clear old state
+                        localStorage.removeItem('analysis-state');
+                    }
+                }
+            } catch (error) {
+                console.log('No saved state found or error loading:', error);
+            }
+        };
+
+        if (!isEdit) {
+            loadSavedState();
+        }
+    }, [isEdit]);
+
+    // 🔥 NEW: Save state whenever critical data changes
+    useEffect(() => {
+        const saveState = () => {
+            // Only save if we have actual analysis data
+            if (!isEdit && (formData.correctMoves || previewUrls.length > 0)) {
+                try {
+                    localStorage.setItem('analysis-state', JSON.stringify({
+                        formData,
+                        data,
+                        previewUrls,
+                        analyzedImages,
+                        fen,
+                        moveHistory,
+                        currentMoveIndex,
+                        chessPosition,
+                        timestamp: Date.now()
+                    }));
+                    console.log('Analysis state saved');
+                } catch (error) {
+                    console.error('Failed to save state:', error);
+                }
+            }
+        };
+
+        // Debounce saves
+        const timeoutId = setTimeout(saveState, 1000);
+        return () => clearTimeout(timeoutId);
+    }, [formData, data, previewUrls, analyzedImages, fen, moveHistory, currentMoveIndex, chessPosition, isEdit]);
+
+    const handleNewAnalysis = () => {
+        try {
+            localStorage.removeItem('analysis-state');
+            // Reset all state to initial values
+            setFormData({
+                correctMoves: "",
+                moveImages: [],
+                remainingMoves: "",
+                suggestedMoves: "",
+                error: "",
+                textBox1: "",
+                whiteMove: "",
+                blackMove: "",
+                textBox2: "",
+                movesByKey: {},
+                invalidMove: "",
+                metadata: {}
+            });
+            setData({});
+            setPreviewUrls([]);
+            setAnalyzedImages([]);
+            setSelectedFiles([]);
+            resetBoard();
+        } catch (error) {
+            console.error('Failed to clear state:', error);
+        }
+    };
 
     const analyzeGame = async () => {
         if (selectedFiles.length === 0) return;
@@ -893,6 +986,7 @@ export default function HomeNew({ isEdit }) {
                                         </Box>}
 
                                     </Button>
+
                                 </HStack>
                                 <HStack
                                     spacing={[2, 4]}
@@ -923,14 +1017,16 @@ export default function HomeNew({ isEdit }) {
                                         borderRadius={"14.82px"}
                                         border={"1px solid"}
                                         width={["100%", "200px"]}
-                                        disabled={selectedFiles?.length === 0}
+                                        disabled={selectedFiles?.length === 0 && Object.entries(formData.movesByKey).length === 0}
 
 
                                         borderColor={"linear-gradient(265.38deg, rgba(255, 255, 255, 0.6) 24.8%, rgba(255, 255, 255, 0.3) 85.32%)"}
                                     >
+
                                         Moves Images <Box bg={"black"} p={1} borderRadius={"full"} border={"1px solid white"}> <IoMdArrowRoundForward /></Box>
                                     </Button>
                                 </HStack>
+
                             </VStack>
 
                         </VStack>
@@ -1172,7 +1268,8 @@ export default function HomeNew({ isEdit }) {
                                             border={"1px solid"}
                                             borderColor={"linear-gradient(265.38deg, rgba(255, 255, 255, 0.6) 24.8%, rgba(255, 255, 255, 0.3) 85.32%)"}
                                         >
-                                            {isEdit ? "Update game" : "Save Game"}  <Box bg={"black"} p={1} borderRadius={"full"} border={"1px solid white"}> <IoMdArrowRoundForward /></Box>
+                                            {console.log(isLibraryView)}
+                                            {isLibraryView ? "Update game" : "Save Game"}  <Box bg={"black"} p={1} borderRadius={"full"} border={"1px solid white"}> <IoMdArrowRoundForward /></Box>
                                         </Button>
                                     </HStack>
 
@@ -1207,7 +1304,28 @@ export default function HomeNew({ isEdit }) {
                                     )}
 
                                 </SimpleGrid>
-
+                                {!isEdit && (formData.correctMoves || previewUrls.length > 0) && (
+                                    <Box bg="#D32C32" py={2} borderRadius={"8.82px"}>
+                                        <Container maxW="container.xl">
+                                            <HStack justify="space-between" align="center">
+                                                <Text color="white" fontSize="sm">
+                                                    Continuing previous analysis
+                                                </Text>
+                                                <Text color="white" fontSize="sm">
+                                                    OR
+                                                </Text>
+                                                <Button
+                                                    size="sm"
+                                                    bg="white"
+                                                    color={"black"}
+                                                    onClick={handleNewAnalysis}
+                                                >
+                                                    Start New Analysis
+                                                </Button>
+                                            </HStack>
+                                        </Container>
+                                    </Box>
+                                )}
                             </Box>
 
 
@@ -1394,7 +1512,7 @@ export default function HomeNew({ isEdit }) {
                 isOpen={isSaveModalOpen}
                 onClose={() => setIsSaveModalOpen(false)}
                 payload={{ ...formData, gameImageUrls: previewUrls, cropImageUrls: analyzedImages, sheetType: data?.metadata?.SheetType }}
-                isEdit={isEdit}
+                isEdit={isLibraryView}
             />
             <SavePositionModal
                 isOpen={isPositionModalOpen}

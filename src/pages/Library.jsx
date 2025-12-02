@@ -100,7 +100,7 @@ const Library = () => {
 
     const handleViewGame = (gameId) => {
         // navigate(`/analyze/${encodeURIComponent(gameId)}`);
-        const url = `/analyze/${encodeURIComponent(gameId)}`;
+        const url = `/analyze/${encodeURIComponent(gameId)}?isLibraryView=true`;
         window.open(url, "_blank");
     };
 

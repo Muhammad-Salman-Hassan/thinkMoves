@@ -28,7 +28,7 @@ function ShareGameModal({ isOpen, onClose, payload, type = "game" }) {
     const [requestSending, setRequestSending] = useState(false);
     const debounceTimer = useRef(null);
 
-   
+
     useEffect(() => {
         if (!isOpen) {
             setUsername("");
@@ -85,7 +85,7 @@ function ShareGameModal({ isOpen, onClose, payload, type = "game" }) {
             setSearchLoading(false);
 
             if (error.response?.status === 404) {
-              
+
                 return;
             }
 
@@ -119,7 +119,7 @@ function ShareGameModal({ isOpen, onClose, payload, type = "game" }) {
             return;
         }
 
-       
+
         if (requestSending) {
             return;
         }
@@ -153,7 +153,7 @@ function ShareGameModal({ isOpen, onClose, payload, type = "game" }) {
                     type: "success",
                 });
 
-             
+
                 setUsername("");
                 setMessage("");
                 setSearchResults([]);
@@ -254,7 +254,7 @@ function ShareGameModal({ isOpen, onClose, payload, type = "game" }) {
                                     )}
                                 </Box>
 
-                              
+
                                 {searchResults.length > 0 && (
                                     <VStack
                                         align="stretch"
@@ -322,7 +322,7 @@ function ShareGameModal({ isOpen, onClose, payload, type = "game" }) {
 
 
 
-                              
+
                                 <Box>
                                     <Text fontSize="sm" color="gray.600" mb={2}>
                                         Add a message
@@ -352,7 +352,7 @@ function ShareGameModal({ isOpen, onClose, payload, type = "game" }) {
                                     loading={requestSending}
                                     disabled={!selectedUser || requestSending}
                                 >
-                                    Share Game
+                                    Share {type === "game" ? "Game" : "Position"}
                                 </Button>
                             </HStack>
                         </Dialog.Footer>

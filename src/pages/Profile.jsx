@@ -115,7 +115,7 @@ function InboxItem({ item, onViewItem }) {
                 </Box>
                 <Box flex={1}>
                     <Text fontSize="12px" fontWeight="semibold" noOfLines={1} letterSpacing={"1px"}>
-                       {item?.senderUserName} Shared {item?.itemType?.toUpperCase() ?? 'ITEM'}
+                        {item?.senderUserName} Shared {item?.itemType?.toUpperCase() ?? 'ITEM'}
                     </Text>
                     <Text fontSize="12px" color="gray.600" noOfLines={1}>
                         {item?.message || 'No message'}
@@ -224,7 +224,7 @@ export default function ProfileUI() {
         if (item?.itemType === 'game' && item?.itemID) {
 
             const gameId = item.itemID;
-            navigate(`/analyze/${encodeURIComponent(gameId)}`);
+            navigate(`/analyze/${encodeURIComponent(gameId)}?isLibraryView=false`);
 
         } else {
             navigate(`/view-position?posID=${encodeURIComponent(item.itemID)}`);
@@ -823,7 +823,7 @@ export default function ProfileUI() {
                                 >
                                     <Flex align="center" gap={2} mb={4}>
                                         <Text fontWeight="bold" fontSize="18px">
-                                           Personalized Gameplay Insights
+                                            Personalized Gameplay Insights
                                         </Text>
                                     </Flex>
 
