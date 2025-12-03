@@ -10,13 +10,10 @@ import {
     Drawer,
     Portal,
     useDisclosure,
-    Text,
-    
 } from "@chakra-ui/react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { FaArrowRight, FaBars, FaDownload, FaChevronDown } from "react-icons/fa";
+import { FaArrowRight, FaBars, FaDownload, FaLinkedinIn, FaInstagram, FaYoutube } from "react-icons/fa";
 import { Tooltip } from "./ToolTip";
-
 
 import sampleImage1 from "../assets/ThinkMovesBack.jpg";
 import sampleImage2 from "../assets/ThinkMovesFront.jpg";
@@ -34,7 +31,6 @@ export default function Navbar() {
         navigate("/");
     };
 
-
     const downloadImage = (imageUrl, fileName) => {
         const link = document.createElement('a');
         link.href = imageUrl;
@@ -44,13 +40,62 @@ export default function Navbar() {
         document.body.removeChild(link);
     };
 
-
     const downloadAllImages = () => {
         downloadImage(sampleImage1, 'sample-image-1.jpg');
         setTimeout(() => {
             downloadImage(sampleImage2, 'sample-image-2.jpg');
         }, 100);
     };
+
+    const SocialButtons = () => (
+        <HStack spacing={2}>
+            <IconButton
+                as="a"
+                href="https://www.linkedin.com/company/thinkmoves/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="LinkedIn"
+                 bg="#E30004"
+                color="white"
+                borderRadius="full"
+                size="sm"
+                _hover={{ bg: "black" }}
+                borderColor={"#e3000434"}
+            >
+                <FaLinkedinIn />
+            </IconButton>
+            <IconButton
+                as="a"
+                href="https://www.instagram.com/thinkmoves?utm_source=qr&igsh=azJ1cTN1bW1qbDE3"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                 bg="#E30004"
+                color="white"
+                borderRadius="full"
+                size="sm"
+                _hover={{ bg: "black" }}
+                borderColor={"#e3000434"}
+            >
+                <FaInstagram />
+            </IconButton>
+            <IconButton
+                as="a"
+                href="https://www.youtube.com/@Official-ThinkMoves"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="YouTube"
+                bg="#E30004"
+                color="white"
+                borderRadius="full"
+                size="sm"
+                _hover={{ bg: "black" }}
+                borderColor={"#e3000434"}
+            >
+                <FaYoutube />
+            </IconButton>
+        </HStack>
+    );
 
     const NavLinks = () => {
         const links = [
@@ -107,7 +152,6 @@ export default function Navbar() {
     };
 
     return (
-
         <Box
             as="nav"
             w="100%"
@@ -132,27 +176,25 @@ export default function Navbar() {
                         THINKMOVES
                     </Heading>
 
-                    <Flex align="center" gap="40px" display={{ base: "none", md: "flex" }}>
+                    <Flex align="center" gap="20px" display={{ base: "none", md: "flex" }}>
                         <HStack spacing={8}>
                             <NavLinks />
                         </HStack>
+                        
+                        <SocialButtons />
+                        
                         <Button
-
-                            to="/login"
                             bg="#D32C32"
                             color="white"
                             _hover={{ bg: "#b92027" }}
                             borderRadius="14.82px"
-                            // px="16px"
                             py="10px"
                             rightIcon={<FaArrowRight />}
                             border="1.65px solid #D32C32"
-                            // gap="10px"
                             onClick={downloadAllImages}
                         >
                             Download Sample images
                         </Button>
-
 
                         {token ? (
                             <></>
@@ -204,21 +246,23 @@ export default function Navbar() {
                                 <Flex direction="column" gap={4}>
                                     <NavLinks />
 
-                                    {/* Download Section in Mobile */}
+                                   
                                     <Box>
-                                        
+                                        <SocialButtons />
+                                    </Box>
+
+                                    <Box>
                                         <Flex direction="column" gap={2}>
-                                            
                                             <Button
                                                 onClick={downloadAllImages}
                                                 bg="#D32C32"
-                                            color="white"
-                                            _hover={{ bg: "#b92027" }}
-                                            borderRadius="14.82px"
-                                            px="16px"
-                                            py="10px"
-                                            border="1.65px solid #D32C32"
-                                            gap="10px"
+                                                color="white"
+                                                _hover={{ bg: "#b92027" }}
+                                                borderRadius="14.82px"
+                                                px="16px"
+                                                py="10px"
+                                                border="1.65px solid #D32C32"
+                                                gap="10px"
                                                 leftIcon={<FaDownload />}
                                             >
                                                 Download Sample Images
@@ -281,6 +325,5 @@ export default function Navbar() {
                 </Portal>
             </Drawer.Root>
         </Box>
-
     );
 }

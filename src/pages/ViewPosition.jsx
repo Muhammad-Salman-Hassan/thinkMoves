@@ -33,7 +33,7 @@ const ViewPosition = () => {
     const [data, setData] = useState(null);
 
     const token = localStorage.getItem('id_token');
-    console.log(data,"data")
+    
    useEffect(() => {
     if (posIdFromUrl) {
         fetchPosition();

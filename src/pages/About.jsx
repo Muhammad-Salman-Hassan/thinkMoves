@@ -72,7 +72,7 @@ const About = () => {
             <Container maxW="container.xl" px={{ base: 4, md: 8 }} >
                 <Box bg="white" px={{ base: 6, md: 16, lg: 0 }} py={{ base: 12, md: 24, lg: 12 }}>
                     <Flex
-                        align="stretch" // key: makes both columns equal height
+                        align="stretch" 
                         direction={{ base: "column-reverse", md: "row" }}
                         justify="space-between"
                         gap={12}
@@ -86,11 +86,11 @@ const About = () => {
                                 borderRadius="xl"
                                 boxShadow="lg"
                                 w="100%"
-                                h="100%" // will stretch to match text height
+                                h="100%" 
                                 objectFit="cover"
                             />
                         </Box>
-                        {/* Text Side */}
+                        
                         <VStack
                             align="start"
                             justify="center"

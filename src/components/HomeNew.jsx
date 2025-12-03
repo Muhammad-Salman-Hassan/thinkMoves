@@ -11,7 +11,7 @@ import {
     Container,
     Image,
     Heading,
-    
+
     IconButton,
     useBreakpointValue,
     Field,
@@ -21,7 +21,7 @@ import {
 } from "@chakra-ui/react";
 import { Chess } from "chess.js";
 import ChessGame from "./ChessGame";
-import { FaInfoCircle } from "react-icons/fa";
+import { FaInfoCircle, FaVideo } from "react-icons/fa";
 import { RiResetLeftFill } from "react-icons/ri";
 import { IoMdArrowRoundBack, IoMdArrowRoundForward } from "react-icons/io";
 import { Tooltip } from "./ToolTip";
@@ -38,6 +38,7 @@ import axios from "axios";
 import { LuSearch } from "react-icons/lu";
 import ShareGameModal from "./ShareGame";
 import { MdFirstPage, MdLastPage } from 'react-icons/md';
+import VideoPlayerModal from "./VideoModal";
 
 export default function HomeNew({ isEdit }) {
     const chessGameRef = useRef(new Chess());
@@ -69,6 +70,7 @@ export default function HomeNew({ isEdit }) {
     const [previewUrls, setPreviewUrls] = useState([]);
     const [analyzedImages, setAnalyzedImages] = useState([]);
     const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+    const [isVideoOpen, setIsVideoOpen] = useState(false);
     const [isPositionModalOpen, setIsPositionModalOpen] = useState(false);
     const [isShareGameModal, setIsShareGameModal] = useState(false);
     const [isImageModalOpen, setIsImageModalOpen] = useState(false);
@@ -378,7 +380,7 @@ export default function HomeNew({ isEdit }) {
     };
 
     const moveToStart = () => {
-       
+
         if (moveHistory.length > 0) {
             chessGame.reset();
 
@@ -393,7 +395,7 @@ export default function HomeNew({ isEdit }) {
     };
 
     const moveToEnd = () => {
-       
+
         if (moveHistory.length > 1) {
             chessGame.reset();
 
@@ -440,7 +442,7 @@ export default function HomeNew({ isEdit }) {
                     const now = Date.now();
                     const dayInMs = 24 * 60 * 60 * 1000;
 
-                    
+
                     if (now - state.timestamp < 7 * dayInMs) {
                         console.log('Restoring saved analysis state...');
                         setFormData(state.formData);
@@ -452,7 +454,7 @@ export default function HomeNew({ isEdit }) {
                         setCurrentMoveIndex(state.currentMoveIndex);
                         setChessPosition(state.chessPosition);
                     } else {
-                       
+
                         localStorage.removeItem('analysis-state');
                     }
                 }
@@ -466,10 +468,10 @@ export default function HomeNew({ isEdit }) {
         }
     }, [isEdit]);
 
-    
+
     useEffect(() => {
         const saveState = () => {
-          
+
             if (!isEdit && (formData.correctMoves || previewUrls.length > 0)) {
                 try {
                     localStorage.setItem('analysis-state', JSON.stringify({
@@ -490,7 +492,7 @@ export default function HomeNew({ isEdit }) {
             }
         };
 
-       
+
         const timeoutId = setTimeout(saveState, 1000);
         return () => clearTimeout(timeoutId);
     }, [formData, data, previewUrls, analyzedImages, fen, moveHistory, currentMoveIndex, chessPosition, isEdit]);
@@ -498,7 +500,7 @@ export default function HomeNew({ isEdit }) {
     const handleNewAnalysis = () => {
         try {
             localStorage.removeItem('analysis-state');
-           
+
             setFormData({
                 correctMoves: "",
                 moveImages: [],
@@ -597,6 +599,9 @@ export default function HomeNew({ isEdit }) {
 
     const handleOpenSaveModal = () => {
         setIsSaveModalOpen(true);
+    };
+    const handleVideoOpen = () => {
+        setIsVideoOpen(true);
     };
     const handleOpenPositionModal = () => {
         setIsPositionModalOpen(true);
@@ -786,6 +791,10 @@ export default function HomeNew({ isEdit }) {
     );
 
 
+    const handleViewHowItWork = () => {
+        window.open('/process', '_blank');
+    }
+
 
     return (
         <>
@@ -805,23 +814,9 @@ export default function HomeNew({ isEdit }) {
                             display="flex"
                             alignItems="center"
                         >
-                            How IT Works? <Tooltip
-                                content="ThinkMoves was built for players who believe improvement starts with insight. We bridge the gap between classic chess play and modern AI analysis."
-                                positioning={{ placement: "right-end" }}
-                                contentStyleProps={{
-                                    bg: "#D32C32",
-                                    color: "white",
-
-                                    fontWeight: "semibold",
-                                    px: 3,
-                                    borderRadius: "md",
-                                    boxShadow: "md",
-                                    display: "flex",
-                                    alignItems: "center",
-                                }}
-                            ><FaInfoCircle style={{ marginLeft: "0.5rem", cursor: "pointer" }} />
-                            </Tooltip>
+                            How IT Works? <FaInfoCircle style={{ marginLeft: "0.5rem", cursor: "pointer" }} onClick={handleViewHowItWork} />
                         </Text>
+
                         <Heading
                             fontSize={{ base: "2xl", sm: "4xl", md: "5xl", lg: "6xl" }}
                             fontFamily="'Clash Display', sans-serif"
@@ -830,6 +825,8 @@ export default function HomeNew({ isEdit }) {
                         >
                             CHESS GAME ANALYZER
                         </Heading>
+
+
                     </VStack>
 
                     <Flex
@@ -1039,7 +1036,15 @@ export default function HomeNew({ isEdit }) {
                             px={{ base: 2, md: 4 }}
                             zIndex="2"
                         >
-
+                            <Text
+                                fontSize={{ base: "lg", md: "2xl" }}
+                                color="white"
+                                fontFamily="'Clash Display', sans-serif"
+                                display="flex"
+                                alignItems="center"
+                            >
+                                Watch Tutorial <FaVideo style={{ marginLeft: "0.5rem", cursor: "pointer" }} onClick={handleVideoOpen} />
+                            </Text>
                             <InputGroup mb={3} endElement={<LuSearch />} bg={"white"} borderRadius={"md"} color={"black"}>
 
 
@@ -1268,7 +1273,7 @@ export default function HomeNew({ isEdit }) {
                                             border={"1px solid"}
                                             borderColor={"linear-gradient(265.38deg, rgba(255, 255, 255, 0.6) 24.8%, rgba(255, 255, 255, 0.3) 85.32%)"}
                                         >
-                                            {console.log(isLibraryView)}
+
                                             {isLibraryView ? "Update game" : "Save Game"}  <Box bg={"black"} p={1} borderRadius={"full"} border={"1px solid white"}> <IoMdArrowRoundForward /></Box>
                                         </Button>
                                     </HStack>
@@ -1523,6 +1528,11 @@ export default function HomeNew({ isEdit }) {
                 isOpen={isShareGameModal}
                 onClose={() => setIsShareGameModal(false)}
                 payload={{ gameId: formData.gameId }}
+            />
+            <VideoPlayerModal
+                isOpen={isVideoOpen}
+                onClose={() => setIsVideoOpen(false)}
+
             />
 
 

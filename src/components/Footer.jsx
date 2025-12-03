@@ -10,7 +10,7 @@ import {
     IconButton,
 } from "@chakra-ui/react";
 import {
-    FaFacebookF,
+    FaYoutube,
     FaLinkedinIn,
     FaInstagram,
     FaArrowUp,
@@ -119,7 +119,7 @@ export default function Footer() {
                                 as="a"
                                 href="https://www.instagram.com/thinkmoves?utm_source=qr&igsh=azJ1cTN1bW1qbDE3"
                                 aria-label="Instagram"
-                                
+
                                 bg="#1a1a1a86"
                                 color="white"
                                 borderRadius="full"
@@ -127,6 +127,19 @@ export default function Footer() {
                                 borderColor={"#e3000434"}
                             >
                                 <FaInstagram />
+                            </IconButton>
+                            <IconButton
+                                as="a"
+                                href="https://www.youtube.com/@Official-ThinkMoves"
+                                aria-label="Instagram"
+
+                                bg="#1a1a1a86"
+                                color="white"
+                                borderRadius="full"
+                                _hover={{ bg: "#E30004" }}
+                                borderColor={"#e3000434"}
+                            >
+                                <FaYoutube />
                             </IconButton>
                         </HStack>
                     </VStack>
@@ -163,11 +176,11 @@ export default function Footer() {
                             <Heading size="sm" fontWeight="600" mb={2}>
                                 Contact Us
                             </Heading>
-                           
+
                             <Link href="mailto:info@thinkmoves.com" color="gray.300">
                                 info@thinkmoves.com
                             </Link>
-                           
+
                         </VStack>
                     </Flex>
                 </Flex>
