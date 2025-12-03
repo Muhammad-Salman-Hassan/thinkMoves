@@ -727,6 +727,7 @@ const Library = () => {
                 onClose={() => setIsShareGameModal(false)}
                 type={sharePayload.type}
                 payload={{ gameId: sharePayload.id }}
+              
             />
 
 

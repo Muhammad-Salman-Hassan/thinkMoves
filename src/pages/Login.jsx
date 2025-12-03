@@ -28,12 +28,14 @@ import whitegradient from "../assets/whitebg.png";
 export default function Login() {
   const navigate = useNavigate();
 
-  const domain = "https://us-east-1nsigylqjx.auth.us-east-1.amazoncognito.com";
-  const clientId = "7bn490vsh2qg3qkk3ka75r8qht";
+
+  const domain = import.meta.env.VITE_AWS_DOMAIN;
+  const clientId = import.meta.env.VITE_CLIENT_ID;
+
   const redirectUri =
     window.location.hostname === "localhost"
-      ? "http://localhost:3000/callback"
-      : "https://thinkmovesui.vercel.app/callback";
+      ? import.meta.env.VITE_REDIRECT_LOCAL
+      : import.meta.env.VITE_REDIRECT_LIVE;
 
   const handleCognitoLogin = () => {
     const loginUrl = `${domain}/login?client_id=${clientId}&response_type=code&scope=email+openid+phone&redirect_uri=${encodeURIComponent(
@@ -86,8 +88,8 @@ export default function Login() {
             <Field.Root required>
               <Field.Label>Email <Field.RequiredIndicator /></Field.Label>
               <InputGroup startElement={<Icon as={RiMailFill} color="gray.400" boxSize={5} />}>
-                <Input 
-                  placeholder="jamesandrew@gmail.com" 
+                <Input
+                  placeholder="jamesandrew@gmail.com"
                   type="email"
                   size="lg"
                   borderRadius="md"
@@ -104,8 +106,8 @@ export default function Login() {
               <Field.Root required>
                 <Field.Label>Password <Field.RequiredIndicator /></Field.Label>
                 <InputGroup startElement={<Icon as={RiLockUnlockFill} color="gray.400" boxSize={5} />}>
-                  <Input 
-                    placeholder="••••••••••••••••••" 
+                  <Input
+                    placeholder="••••••••••••••••••"
                     type="password"
                     size="lg"
                     borderRadius="md"
