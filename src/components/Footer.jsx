@@ -177,8 +177,8 @@ export default function Footer() {
                                 Contact Us
                             </Heading>
 
-                            <Link href="mailto:info@thinkmoves.com" color="gray.300">
-                                info@thinkmoves.com
+                            <Link href="mailto:thinkmove2025@gmail.com" color="gray.300">
+                                thinkmove2025@gmail.com
                             </Link>
 
                         </VStack>

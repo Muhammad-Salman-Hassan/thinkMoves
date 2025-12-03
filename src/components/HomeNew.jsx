@@ -1042,8 +1042,10 @@ export default function HomeNew({ isEdit }) {
                                 fontFamily="'Clash Display', sans-serif"
                                 display="flex"
                                 alignItems="center"
+                                onClick={handleVideoOpen}
+                                cursor={"pointer"}
                             >
-                                Watch Tutorial <FaVideo style={{ marginLeft: "0.5rem", cursor: "pointer" }} onClick={handleVideoOpen} />
+                                VIew Demo Video <FaVideo style={{ marginLeft: "0.5rem", cursor: "pointer" }}  />
                             </Text>
                             <InputGroup mb={3} endElement={<LuSearch />} bg={"white"} borderRadius={"md"} color={"black"}>
 
